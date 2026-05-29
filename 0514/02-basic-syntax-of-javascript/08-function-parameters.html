@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    // 기본 함수 매개변수
+    const greeting = function (name = 'Anonymous') {
+     return `Hi ${name}`
+    }
+
+    greeting() // Hi Anonymous
+
+    // 나머지 매개변수 
+    const myFunc = function (param1, param2, ...restPrams) {
+      return [param1, param2, restPrams]
+    }
+
+    myFunc(1, 2, 3, 4, 5) // [1, 2, [3, 4, 5]]
+    myFunc(1, 2) // [1, 2, []]
+
+    // 매개변수 > 인자 (나머지는 undefined 할당)
+    const threeArgs = function (param1, param2, param3) {
+      return [param1, param2, param3]
+    }
+
+    threeArgs() // [undefiend, undefiend, undefiend]
+    threeArgs(1) // [1, undefiend, undefiend]
+    threeArgs(2, 3) // [2, 3, undefiend]
+
+    // 매개변수 < 인자 ( 넘치면 사용하지 않음 ) 
+    const noArgs = function () {
+      return 0
+    }
+    noArgs(1, 2, 3) // 0
+
+    const twoArgs = function (param1, param2) {
+      return [param1, param2]
+    }
+    twoArgs(1, 2, 3) // [1, 2]
+
+
+  </script>
+</body>
+
+</html>

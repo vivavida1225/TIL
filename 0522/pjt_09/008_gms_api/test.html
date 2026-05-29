@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TTS 오디오 테스트</title>
+  <style>
+    body {
+      font-family: "Malgun Gothic", sans-serif;
+      max-width: 480px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .user-input {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .send-btn {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .send-btn:hover {
+      background: #1d4ed8;
+    }
+    .send-btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+    .audio-result-container {
+      min-height: 48px;
+    }
+    .audio-result-container audio {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    .error-msg {
+      color: #dc2626;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>TTS 오디오 테스트</h1>
+  <div class="input-wrapper">
+    <input class="user-input" type="text" placeholder="재생할 문장을 입력하세요" />
+    <button class="send-btn" type="button">생성</button>
+  </div>
+  <div class="audio-result-container"></div>
+
+  <script>
+    const userInput = document.querySelector(".user-input");
+    const sendBtn = document.querySelector(".send-btn");
+    const audioResultContainer = document.querySelector(".audio-result-container");
+
+    const TTS_API_URL = "http://localhost:8000/api/v1/audio/speech";
+
+    function showError(message) {
+      const existing = audioResultContainer.querySelector(".error-msg");
+      if (existing) existing.remove();
+      const err = document.createElement("p");
+      err.className = "error-msg";
+      err.textContent = message;
+      audioResultContainer.appendChild(err);
+    }
+
+    function clearError() {
+      const existing = audioResultContainer.querySelector(".error-msg");
+      if (existing) existing.remove();
+    }
+
+    sendBtn.addEventListener("click", () => {
+      if (!userInput.value.trim()) return;
+
+      clearError();
+      sendBtn.disabled = true;
+
+      fetch(TTS_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input: userInput.value.trim() }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((err) => Promise.reject(err)).catch(() => {
+              throw new Error(`요청 실패: ${response.status}`);
+            });
+          }
+          return response.json();
+        })
+        .then((data) => {
+          let audioEntity = audioResultContainer.querySelector("audio");
+          if (!audioEntity) {
+            audioEntity = document.createElement("audio");
+            audioEntity.controls = true;
+            audioResultContainer.appendChild(audioEntity);
+          }
+          audioEntity.src = `data:audio/mp3;base64,${data.audio_data}`;
+        })
+        .catch((error) => {
+          console.error(error);
+          showError(error.message || "오디오 생성 중 오류가 발생했습니다.");
+        })
+        .finally(() => {
+          sendBtn.disabled = false;
+        });
+    });
+  </script>
+</body>
+</html>

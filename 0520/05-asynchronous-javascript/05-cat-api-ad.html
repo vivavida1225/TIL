@@ -1,0 +1,51 @@
+<!-- cat-api-ad.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <button>냥냥펀치</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    // 목표: 버튼을 누르면 고양이 이미지를 출력하기
+    // 주소: https://api.thecatapi.com/v1/images/search
+
+    // 1. 버튼 태그 가져오기
+    const btnTag = document.querySelector('button')
+
+    // 2. 이벤트 핸들러
+    const getCatImageHandler = function (event) {
+      // 2.1 고양이 이미지 가져와
+      axios({
+        method: 'get',
+        url: 'https://api.thecatapi.com/v1/images/search'
+      })
+      .then((response) => {
+        // console.log(response.data[0].url)
+        const imgUrl = response.data[0].url
+        const imgTag = document.createElement('img')
+        imgTag.setAttribute('src', imgUrl)
+        document.body.appendChild(imgTag)
+      })
+      .catch((error) => {
+        console.log('request failed', error)
+      })
+
+
+      // 2.2 고양이 이미지 태그 만들고 추가
+    }
+
+    // 3. 둘이 링크
+    btnTag.addEventListener('click', getCatImageHandler)
+
+  </script>
+</body>
+
+</html>

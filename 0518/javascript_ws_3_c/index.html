@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    const students = [
+      { name: 'Alice', scores: [85, 90, 95] },
+      { name: 'Bella', scores: [50, 80, 80] },
+      { name: 'Caley', scores: [90, 55, 35] },
+      { name: 'Dave', scores: [100, 100, 100] },
+      { name: 'Eve', scores: [88, 90, 92] }
+    ]
+    // 아래에 코드 작성
+
+    const makeAvgScores1 = function (students) {
+      const arrLen = students.length
+      let temp = {}
+      for (let i = 0; i < arrLen; i++){
+        const studentName = students[i].name
+        const studentScores = students[i].scores
+        const studentAverage = (studentScores.reduce((acc, cur) => acc + cur, 0))/3
+        
+        temp[studentName] = studentAverage
+      }
+      // console.log(temp)
+      return temp
+    }
+
+    const makeAvgScores2 = function (students) {
+      const arrLen = students.length
+      let temp = {}
+      for (const element of students) {
+        const studentName = element.name
+        const studentScores = element.scores
+        const studentAverage = (studentScores.reduce((acc, cur) => acc + cur, 0))/3
+
+        temp[studentName] = studentAverage
+      }
+      return temp
+    }
+
+    const makeAvgScores3 = function (students) {
+
+      // 콜백 위한 함수 정의
+      const getAverage = function (person) {
+        let temp = 0
+        // console.log(person)
+        const name = person.name
+        const scores = person.scores
+        for (const score of scores) {
+          temp += score
+          // console.log(temp)
+        }
+        const result = {[name] : temp/3}
+        // console.log(result)
+        return result
+      }
+
+      const result = students.map((item) => {
+        return getAverage(item)
+      })
+
+      return Object.assign({}, ...result)
+    }
+
+
+    // 함수 호출
+    const result1 = makeAvgScores1(students)
+    const result2 = makeAvgScores2(students)
+    const result3 = makeAvgScores3(students)
+    console.log(result1)
+    console.log(result2)
+    console.log(result3)
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,561 @@
+{% extends 'base.html' %}
+{% block title %}야무짐 - 스마트한 여행 준비의 모든 것{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        text-align: center;
+        padding: 3rem 1rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        line-height: 1.15;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #ffffff 40%, var(--accent-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+        font-size: 1.25rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 2.5rem;
+    }
+
+    /* Grid layout */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+
+    .feature-card {
+        padding: 2.5rem;
+        text-align: left;
+    }
+
+    .feature-icon {
+        font-size: 2.2rem;
+        color: var(--accent-color);
+        margin-bottom: 1.5rem;
+        background: rgba(0, 229, 255, 0.1);
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 229, 255, 0.2);
+    }
+
+    .feature-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+    }
+
+    .feature-desc {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    /* Logged in User Profile Card */
+    .profile-card {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 3rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(124, 77, 255, 0.08) 0%, transparent 60%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .profile-header {
+        position: relative;
+        z-index: 1;
+    }
+
+    .profile-avatar-large {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid var(--accent-color);
+        object-fit: cover;
+        box-shadow: 0 0 25px rgba(0, 229, 255, 0.4);
+        margin: 0 auto 1.5rem;
+        transition: transform 0.5s ease;
+    }
+
+    .profile-avatar-large:hover {
+        transform: rotate(5deg) scale(1.05);
+    }
+
+    .profile-nickname {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(254, 229, 0, 0.15);
+        color: var(--kakao-yellow);
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid rgba(254, 229, 0, 0.25);
+        margin-bottom: 2rem;
+    }
+
+    .profile-details-list {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2.5rem;
+        text-align: left;
+        position: relative;
+        z-index: 1;
+    }
+
+    .profile-detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .profile-detail-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .profile-detail-item:first-child {
+        padding-top: 0;
+    }
+
+    .detail-label {
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .detail-val {
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .dashboard-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .profile-card {
+            padding: 2rem 1.5rem;
+        }
+    }
+
+    /* Travel Plans Styles */
+    .travel-section {
+        max-width: 800px;
+        margin: 4rem auto 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .travel-section-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: linear-gradient(to right, #ffffff, #c7d2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .travel-section-title i {
+        background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .travel-plans-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+
+    .travel-plan-card {
+        padding: 1.8rem;
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .travel-plan-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(124, 77, 255, 0.15);
+        border-color: rgba(124, 77, 255, 0.3);
+    }
+
+    .travel-info-left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .travel-dates-header {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .travel-dates-header i {
+        color: var(--accent-color);
+        font-size: 1rem;
+    }
+
+    .travel-badge-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .travel-badge-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .badge-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        min-width: 45px;
+        font-weight: 500;
+    }
+
+    .travel-badge-country {
+        background: rgba(0, 229, 255, 0.08);
+        color: var(--accent-color);
+        border: 1px solid rgba(0, 229, 255, 0.25);
+        padding: 0.25rem 0.65rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        box-shadow: 0 0 8px rgba(0, 229, 255, 0.05);
+    }
+
+    .travel-badge-city {
+        background: rgba(124, 77, 255, 0.12);
+        color: #c7d2fe;
+        border: 1px solid rgba(124, 77, 255, 0.3);
+        padding: 0.25rem 0.65rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        box-shadow: 0 0 8px rgba(124, 77, 255, 0.08);
+    }
+
+    .btn-delete-travel {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: rgba(255, 82, 82, 0.05);
+        border: 1px solid rgba(255, 82, 82, 0.15);
+        color: rgba(255, 82, 82, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-delete-travel:hover {
+        background: rgba(255, 82, 82, 0.15);
+        border-color: rgba(255, 82, 82, 0.4);
+        color: #ff5252;
+        transform: scale(1.08);
+        box-shadow: 0 0 15px rgba(255, 82, 82, 0.2);
+    }
+
+    .travel-empty-card {
+        padding: 3rem;
+        text-align: center;
+        color: var(--text-muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .travel-empty-icon {
+        font-size: 3rem;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<!-- LOGGED IN USER INTERFACE -->
+<div class="profile-card glass-card" id="user-dashboard-card">
+    <div class="profile-header">
+        {% if user.profile_image_url %}
+        <img src="{{ user.profile_image_url }}" alt="Profile Image" class="profile-avatar-large"
+            id="profile-avatar-img">
+        {% else %}
+        <div class="profile-avatar-large"
+            style="display: flex; align-items: center; justify-content: center; background: var(--primary-color); font-weight: 800; font-size: 3rem; color: white;"
+            id="profile-avatar-img-placeholder">
+            {{ user.nickname|default:user.first_name|default:user.username|slice:":1"|upper }}
+        </div>
+        {% endif %}
+        <h2 class="profile-nickname" id="profile-user-nickname">{{ user.nickname|default:user.first_name }}</h2>
+        <div class="profile-badge" id="kakao-badge">
+            <i class="fa-solid fa-comment"></i> Kakao 연동 완료
+        </div>
+    </div>
+
+    <div class="profile-details-list" id="profile-details-container">
+        <div class="profile-detail-item">
+            <span class="detail-label">사용자 아이디</span>
+            <span class="detail-val" id="profile-username-val">{{ user.username }}</span>
+        </div>
+        <div class="profile-detail-item">
+            <span class="detail-label">이메일 주소</span>
+            <span class="detail-val" id="profile-email-val">{{ user.email|default:"이메일 제공 동의 안 함" }}</span>
+        </div>
+        <div class="profile-detail-item">
+            <span class="detail-label">카카오 고유 ID</span>
+            <span class="detail-val" id="profile-kakaoid-val"
+                style="color: var(--accent-color);">{{user.kakao_id}}</span>
+        </div>
+        <div class="profile-detail-item">
+            <span class="detail-label">성별</span>
+            <span class="detail-val" id="profile-gender-val">{{ user.gender|default:"미입력" }}</span>
+        </div>
+        <div class="profile-detail-item">
+            <span class="detail-label">생년월일</span>
+            <span class="detail-val" id="profile-birth-date-val">{{ user.birth_date|date:"Y년 m월 d일"|default:"미입력" }}</span>
+        </div>
+        {% if user.preference %}
+        <div class="profile-detail-item">
+            <span class="detail-label">위생 민감도</span>
+            <span class="detail-val" id="profile-hygiene-val" style="color: var(--accent-color);">
+                {% if user.preference.hygiene_sensitivity %}
+                    {{ user.preference.hygiene_sensitivity }} / 10
+                {% else %}
+                    미입력
+                {% endif %}
+            </span>
+        </div>
+        <div class="profile-detail-item">
+            <span class="detail-label">상황 대비성</span>
+            <span class="detail-val" id="profile-preparedness-val" style="color: var(--accent-color);">
+                {% if user.preference.preparedness %}
+                    {{ user.preference.preparedness }} / 10
+                {% else %}
+                    미입력
+                {% endif %}
+            </span>
+        </div>
+        <div class="profile-detail-item" style="flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 0.9rem 0;">
+            <span class="detail-label">선호 관광 스타일</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; width: 100%; margin-top: 0.25rem;">
+                {% for choice in user.preference.choices.all %}
+                    {% if choice.category == 'STYLE' %}
+                        <span style="background: rgba(0, 229, 255, 0.08); color: var(--accent-color); border: 1px solid rgba(0, 229, 255, 0.25); padding: 0.3rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; box-shadow: 0 0 10px rgba(0, 229, 255, 0.1);">{{ choice.name }}</span>
+                    {% endif %}
+                {% empty %}
+                    <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500;">선택된 관광 스타일이 없습니다.</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="profile-detail-item" style="flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 0.9rem 0;">
+            <span class="detail-label">선호 입맛 취향</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; width: 100%; margin-top: 0.25rem;">
+                {% for choice in user.preference.choices.all %}
+                    {% if choice.category == 'TASTE' %}
+                        <span style="background: rgba(124, 77, 255, 0.12); color: #c7d2fe; border: 1px solid rgba(124, 77, 255, 0.3); padding: 0.3rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; box-shadow: 0 0 10px rgba(124, 77, 255, 0.15);">{{ choice.name }}</span>
+                    {% endif %}
+                {% empty %}
+                    <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500;">선택된 입맛 취향이 없습니다.</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="profile-detail-item">
+            <span class="detail-label">가입 일시</span>
+            <span class="detail-val" id="profile-joined-val">{{ user.date_joined|date:"Y년 m월 d일 H:i" }}</span>
+        </div>
+    </div>
+
+    <div class="dashboard-actions" id="dashboard-buttons">
+        <a href="javascript:void(0);" onclick="startPreparation('{{ user.nickname|default:user.first_name|default:user.username }}');" class="btn btn-primary" id="btn-service-start">
+            <i class="fa-solid fa-compass"></i> 여행 준비 시작하기
+        </a>
+        <a href="{% url 'accounts:logout' %}" class="btn btn-outline" id="btn-dashboard-logout">
+            <i class="fa-solid fa-right-from-bracket"></i> 로그아웃
+        </a>
+    </div>
+    </div>
+
+    <!-- 나의 여행 일정 (Timeline & My Travel Plans) -->
+    <div class="travel-section" id="my-travel-section">
+        <h3 class="travel-section-title">
+            <i class="fa-solid fa-plane-departure"></i> 나의 여행 일정
+        </h3>
+        
+        {% if travels %}
+            <div class="travel-plans-grid" id="travel-plans-container">
+                {% for travel in travels %}
+                    <div class="glass-card travel-plan-card" id="travel-card-{{ travel.id }}">
+                        <div class="travel-info-left">
+                            <div class="travel-dates-header">
+                                <i class="fa-solid fa-calendar-days"></i>
+                                <span>{{ travel.start_date|date:"n월 j일" }} ~ {{ travel.end_date|date:"n월 j일" }} ({{ travel.start_date|date:"n월 j일" }}부터 {{ travel.end_date|date:"n월 j일" }}까지)</span>
+                            </div>
+                            <div class="travel-badge-group">
+                                <div class="travel-badge-row">
+                                    <span class="badge-label">국가</span>
+                                    {% for country in travel.countries.all %}
+                                        <span class="travel-badge-country">{{ country.name }}</span>
+                                    {% endfor %}
+                                </div>
+                                <div class="travel-badge-row">
+                                    <span class="badge-label">도시</span>
+                                    {% for city in travel.cities.all %}
+                                        <span class="travel-badge-city">{{ city.name }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="travel-info-right">
+                            <button type="button" class="btn-delete-travel" title="여행 일정 삭제"
+                                    onclick="confirmDeleteTravel('{{ travel.id }}', '{% url 'travel:delete_travel' travel.id %}');">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="glass-card travel-empty-card" id="travel-empty-container">
+                <div class="travel-empty-icon">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <h4 style="font-size: 1.15rem; font-weight: 700; color: white;">등록된 여행 일정이 없습니다.</h4>
+                <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.5rem;">
+                    가고 싶은 국가와 도시를 등록하고 야무짐만의<br>맞춤형 여정 서비스를 경험해보세요!
+                </p>
+                {% if user.gender and user.birth_date %}
+                <a href="javascript:void(0);" onclick="startPreparation('{{ user.first_name|default:user.username }}');" 
+                   class="btn btn-primary" style="padding: 0.7rem 1.8rem; font-size: 0.9rem; border-radius: 50px;">
+                    <i class="fa-solid fa-plus"></i> 첫 여행 계획 등록하기
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% else %}
+<!-- ANONYMOUS USER INTERFACE -->
+<div class="hero-section" id="guest-hero-section">
+    <h1 class="hero-title" id="guest-hero-title">여행의 설렘을 한곳에서,<br>스마트하게 관리하세요.</h1>
+    <p class="hero-desc" id="guest-hero-desc">
+        필수 소지품 체크리스트부터 여행 가이드 및 일정 구성까지,<br>
+        야무짐과 함께 완벽한 여행을 간편하게 준비해 보세요.
+    </p>
+    <a href="{% url 'accounts:login' %}" class="btn btn-primary"
+        style="padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 50px;" id="btn-guest-start">
+        <i class="fa-solid fa-jet-fighter"></i> 지금 시작하기 (카카오 로그인)
+    </a>
+</div>
+
+<div class="features-grid" id="guest-features-grid">
+    <div class="glass-card feature-card" id="card-feature-1">
+        <div class="feature-icon"><i class="fa-solid fa-list-check"></i></div>
+        <h3 class="feature-title">체크리스트 관리</h3>
+        <p class="feature-desc">여행지 날씨와 국가 성격에 알맞는 필수 소지품 리스트를 추천하고 스스로 점검해 볼 수 있습니다.</p>
+    </div>
+    <div class="glass-card feature-card" id="card-feature-2">
+        <div class="feature-icon"><i class="fa-solid fa-route"></i></div>
+        <h3 class="feature-title">간편한 연동 가입</h3>
+        <p class="feature-desc">카카오톡 소셜 계정을 연동해 복잡한 회원 가입 절차 없이 3초 만에 나만의 플래닝 공간을 구축합니다.</p>
+    </div>
+    <div class="glass-card feature-card" id="card-feature-3">
+        <div class="feature-icon"><i class="fa-solid fa-cloud-sun"></i></div>
+        <h3 class="feature-title">실시간 정보 제공</h3>
+        <p class="feature-desc">가고자 하는 전 세계 목적지의 기본 정보, 시차, 실시간 환율 및 기후 현황을 깔끔히 브리핑합니다.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function startPreparation(username) {
+        {% if user.gender and user.birth_date %}
+            const targetUrl = "{% url 'travel:create_travel' %}";
+        {% else %}
+            const targetUrl = "{% url 'accounts:additional_info' %}";
+        {% endif %}
+        window.location.href = targetUrl;
+    }
+
+    function confirmDeleteTravel(travelId, deleteUrl) {
+        if (confirm("해당 여행 일정을 정말 삭제하시겠습니까?")) {
+            const card = document.getElementById("travel-card-" + travelId);
+            if (card) {
+                card.style.transition = "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
+                card.style.opacity = "0";
+                card.style.transform = "translateX(-60px) scale(0.95)";
+                card.style.pointerEvents = "none";
+            }
+            setTimeout(() => {
+                window.location.href = deleteUrl;
+            }, 500);
+        }
+    }
+</script>
+{% endblock %}

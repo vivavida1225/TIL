@@ -1,0 +1,32 @@
+<!-- event.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <button id="btn">버튼</button>
+
+  <script>
+    // 1. 버튼 선택
+    const btn = document.querySelector('#btn')
+
+    // 2. 이벤트 핸들러
+    const detectClick = function (event) {
+      console.log(event) // PointerEvent
+      console.log(event.type) // click
+      console.log(event.currentTarget) // <button id="btn">버튼</button>
+      console.log(this) // <button id="btn">버튼</button>
+    }
+
+    // 3. 버튼에 이벤트 핸들러를 등록
+    btn.addEventListener('click', detectClick)
+  </script>
+</body>
+
+</html>

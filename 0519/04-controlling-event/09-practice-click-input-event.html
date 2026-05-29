@@ -1,0 +1,43 @@
+<!-- click-input-event.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .blue {
+      color: blue;
+    }
+  </style>
+</head>
+
+<body>
+  <h1></h1>
+  <button id="btn">클릭</button>
+  <input type="text" id="text-input">
+
+  <script>
+    // 목표: 입력 값을 실시간으로 출력하고, 클릭 버튼을 클릭 시 출력 값의 CSS를 변경하기 
+    // 1. 입력 이벤트 작성하기
+    const inputTag = document.querySelector('#text-input')
+    const h1Tag = document.querySelector('h1')
+
+    const inputHandler = function(event) {
+      h1Tag.textContent = event.currentTarget.value
+
+    }
+    inputTag.addEventListener('input', inputHandler)
+    // 2. 클릭 버튼 이벤트 작성하기
+    const clickBtn = document.querySelector('#btn')
+    const clickHandler = function(event) {
+      h1Tag.classList.toggle('blue')
+    }
+    clickBtn.addEventListener('click', clickHandler)
+
+  </script>
+</body>
+
+</html>

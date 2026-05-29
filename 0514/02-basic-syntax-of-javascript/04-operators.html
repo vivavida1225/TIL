@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    // 할당 연산자 
+    let a = 0
+
+    a += 10
+    console.log(a) 
+
+    a -= 3
+    console.log(a) 
+
+    a *= 10
+    console.log(a) 
+
+    a %= 7
+    console.log(a)
+
+
+    // 증감 연산자
+    let x = 3
+    const y = x++
+    console.log(x, y)
+
+    let m = 3
+    const n = ++m
+    console.log(m, n)
+
+
+    // 비교 연산자
+    console.log(3 > 2)
+    console.log(3 < 2 )
+    console.log('A' < 'B' )
+    console.log('Z' < 'a' )
+    console.log('가' < '나')
+
+    // 동등 연산자
+    console.log(1 == 1) 
+    console.log('hello' == 'hello')
+    console.log('1' == 1) 
+    console.log(0 == false) 
+
+    // 일치 연산자
+    console.log(1 === 1) 
+    console.log('hello' === 'hello') 
+    console.log('1' === 1) 
+    console.log(0 === false) 
+
+    // 논리연산자
+    console.log(true && false); 
+    console.log(true && true);
+
+    console.log(false || true); 
+    console.log(false || false);
+
+    console.log(!true);
+
+    // --- (중요) 단축 평가 (Short-circuit Evaluation) ---
+    // && (AND) 연산
+    console.log(1 && 0); 
+    console.log(0 && 1); 
+    console.log(4 && 7); 
+
+    // || (OR) 연산
+    console.log(1 || 0); 
+    console.log(0 || 1); 
+    console.log(4 || 7); 
+
+    /* 단축평가 활용 예시
+    1. 단축평가 활용 예시(Positive)
+    let user = null;
+    const name = user || "Guest"; // user가 Falsy(null)이므로 "Guest"
+    console.log(name); // "Guest"
+
+    2. 단축평가 활용 예시2(Negative)
+    let score = 0; // 0점은 유효한 점수
+    let currentScore = score || 50; // 0이 Falsy라서 50이 됨 (버그!)
+    console.log(currentScore); // 50
+
+    3. 단축평가 활용 예시3(해결책)
+    let score = 0;
+    let currentScore;
+
+    if (score === null || score === undefined) {
+        currentScore = 50; // null이나 undefined일 때만 기본값
+    } else {
+        currentScore = score;
+    }
+    console.log(currentScore); // 0 (정상!)
+
+    4. 최종(ES2020 도입) Null 병합 연산자 (Nullish Coalescing Operator) ??
+  
+    let score = 0;
+    // score가 null이나 undefined가 아니므로(0임), 왼쪽 값(0)을 그대로 사용
+    const currentScore = score ?? 50;
+    console.log(currentScore); // 0 
+
+    let user = null;
+    const name = user ?? "Guest";
+    console.log(name); // "Guest"
+    */
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1>{{ person.username }}님의 프로필</h1>
+  <div>
+    팔로워 : {{ person.followers.all|length }} / 팔로우 : {{ person.followings.all|length }}
+  </div>
+
+  {% if request.user != person %}
+    <form action="{% url "accounts:follow" person.pk %}"
+     method="POST" id='follow-form' data-user-id={{ person.pk }}> 
+      {% csrf_token %}
+      {% if request.user in person.followers.all %}
+        <input type="submit" value='UnFollow'>
+      {% else %}
+        <input type="submit" value='Follow'>
+      {% endif %}
+    </form>
+  {% endif %}
+  <hr>
+
+  {% comment %} 게시글 {% endcomment %}
+  <h2>{{ person.username }} 작성한 게시글</h2>
+  {% for article in person.article_set.all %}
+    <div>{{ article.title }}</div>
+  {% endfor %}
+  <hr>
+
+  {% comment %} 댓글 {% endcomment %}
+  <h2>{{ person.username }} 작성한 댓글</h2>
+  {% for comment in person.comment_set.all %}
+    <div>{{ comment.content }}</div>
+  {% endfor %}
+  <hr>
+
+  {% comment %} 좋아요 한 게시글 {% endcomment %}
+  <h2>{{ person.username }} 좋아요 한 게시글</h2>
+  {% for article in person.like_articles.all %}
+    <div>{{ article.title }}</div>
+  {% endfor %}
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const formTag = document.querySelector('#follow-form')
+
+    const formTagHandler = function (event) {
+      event.preventDefault() // 새로고침 동작 막기
+
+      // formTag 의 dataset.userID
+      const userId = event.currentTarget.dataset.userID
+      // csrf_token
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value
+      console.log(userId)
+
+      axios({
+        method: 'post',
+        url: `/accounts/${userId}/follow/`,
+        headers : {
+          'X-CSRFToken' : csrfToken,
+        }
+      }).then((success) => {
+        console.log('성공')
+      }).catch((error) => {
+        console.log('실패')
+      })
+    }
+
+    formTag.addEventListener('submit', formTagHandler)
+  </script>
+</body>
+</html>

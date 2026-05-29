@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    // number
+    const a = 13 
+    const b = -5 
+    const c = 3.14 
+    const d = 2.998e8
+    const e = Infinity 
+    const f = -Infinity
+    const g = NaN
+    
+    const k = 13.0
+    // console.log(a == k)  // true
+    // console.log(a === k)  // true
+    // console.log(0.1 + 0.2)  // 0.30000000000000004
+
+    // string
+    const firstName = 'Tony'
+    const lastName = 'Stark'
+    const fullName = firstName + lastName  // + 로 문자열 결합 가능
+    console.log(fullName) 
+
+    // 템플릿 리터럴(Template literals)
+    const age = 100 
+    const message = `홍길동은 ${age}세입니다.`
+    console.log(message) // 홍길동은 100세입니다.
+
+    // null(값이 없음을 의도적으로 나타냄)
+    let x = null
+    console.log(x) // null
+    console.log(typeof x)  // object
+    console.log(10 + x)  // 10
+
+    // undefined(값이 할당되지 않은 상태)
+    let y 
+    console.log(y)  // undefined
+    console.log(typeof y)  // undefined
+    console.log(10 + y)  // NaN
+
+    // boolean(true, false)
+    let m = true
+    let n = false
+    console.log(typeof m)  // boolean
+    console.log(10 > 5)  // true
+    console.log(10 < 5)  // false
+    
+  </script>
+</body>
+
+</html>

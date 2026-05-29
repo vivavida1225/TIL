@@ -1,0 +1,43 @@
+<!-- click-event.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+
+  <body>
+    <button id="btn">버튼</button>
+    <p>
+      클릭횟수 :
+      <span id="counter">0</span>
+    </p>
+
+    <script>
+      // 목표: 버튼을 클릭하면 숫자를 1씩 증가시키기 
+
+      // 1. 버튼 클릭 횟수 초기값 설정 
+      let initValue = 0
+
+      // 2. 버튼 요소 선택
+      const btn = document.querySelector("#btn")
+
+      // 3. 이벤트 핸들러(콜백 함수) 작성 - 버튼 클릭 시 발생할 이벤트 
+      const clickHandler = function(event) {
+        // console.log("이벤트 탐지됨")
+        // 3.1 버튼 클릭 횟수 +1
+        initValue ++
+        console.log(initValue)
+      // 3.2 클릭 횟수를 보여주는 태그 선택
+      const pTag = document.querySelector('#counter')
+      // 3.3 태그의 콘텐츠를 +1 된 버튼 클릭 횟수로 변경
+      pTag.textContent = initValue
+      }
+
+      // 4. 버튼에 이벤트 핸들러 등록
+      btn.addEventListener("click", clickHandler)
+    </script>
+  </body>
+</html>

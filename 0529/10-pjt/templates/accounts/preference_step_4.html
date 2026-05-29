@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% block title %}여행 취향 설문 (4/4) - 야무짐{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pref-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 650px;
+        margin: 0 auto;
+    }
+
+    .pref-card {
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Wizard Progress Bar */
+    .wizard-progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        position: relative;
+    }
+
+    .wizard-progress::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--border-color);
+        z-index: 0;
+        transform: translateY(-50%);
+    }
+
+    .progress-bar-fill {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 75%; /* Step 4 is 75% filled */
+        height: 2px;
+        background: var(--primary-color);
+        box-shadow: 0 0 10px var(--primary-color);
+        z-index: 1;
+        transform: translateY(-50%);
+        transition: width 0.5s ease;
+    }
+
+    .progress-step {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--bg-color);
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        z-index: 2;
+        transition: all 0.4s ease;
+    }
+
+    .progress-step.active {
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+        background: rgba(0, 229, 255, 0.1);
+    }
+
+    .progress-step.complete {
+        border-color: var(--primary-color);
+        color: white;
+        background: var(--primary-color);
+        box-shadow: 0 0 10px rgba(124, 77, 255, 0.3);
+    }
+
+    .pref-icon-container {
+        font-size: 2.8rem;
+        background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.75rem;
+        text-align: center;
+    }
+
+    .pref-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-align: center;
+        background: linear-gradient(to right, #ffffff, #c7d2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .pref-subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 2.5rem;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    /* Tag Selection Grid */
+    .choices-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.01);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .tag-option {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .tag-option input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .tag-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        padding: 0.7rem 1.2rem;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        user-select: none;
+    }
+
+    .check-indicator {
+        font-size: 0.9rem;
+        opacity: 0.3;
+        transition: all 0.3s ease;
+    }
+
+    /* Active neon styles when checked */
+    .tag-option input[type="checkbox"]:checked + .tag-card {
+        background: rgba(0, 229, 255, 0.12);
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+        box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .tag-option input[type="checkbox"]:checked + .tag-card .check-indicator {
+        opacity: 1;
+        color: var(--accent-color);
+    }
+
+    .tag-card:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.15);
+        color: var(--text-main);
+    }
+
+    /* Action buttons grid */
+    .actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 1rem;
+    }
+
+    .btn-skip {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 0.94rem;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+    }
+
+    .btn-skip:hover {
+        background: rgba(255, 82, 82, 0.08);
+        border-color: rgba(255, 82, 82, 0.25);
+        color: #ff5252;
+    }
+
+    .btn-next {
+        background: linear-gradient(135deg, var(--primary-color), #4a148c);
+        color: white;
+        font-weight: 700;
+        border: none;
+        padding: 0.94rem;
+        border-radius: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(124, 77, 255, 0.3);
+    }
+
+    .btn-next:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(124, 77, 255, 0.5);
+    }
+
+    .btn-next:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(124, 77, 255, 0.25);
+    }
+
+    /* Horizontal Slide Card Transition */
+    .pref-card {
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+    }
+    
+    .pref-card.slide-init {
+        transform: translateX(100vw) scale(0.95);
+        opacity: 0;
+    }
+
+    .pref-card.slide-active {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pref-wrapper" id="pref-container-wrapper">
+    <div class="glass-card pref-card slide-init" id="pref-card-main">
+        
+        <!-- Progress steps indicator -->
+        <div class="wizard-progress" id="progress-wizard">
+            <div class="progress-bar-fill" id="progress-fill" style="width: 75%;"></div>
+            <div class="progress-step complete">1</div>
+            <div class="progress-step complete">2</div>
+            <div class="progress-step complete">3</div>
+            <div class="progress-step active">4</div>
+        </div>
+
+        <div class="pref-icon-container" id="pref-brand-icon">
+            <i class="fa-solid fa-utensils"></i>
+        </div>
+        <h2 class="pref-title" id="heading-pref">4. 선호 입맛 설정</h2>
+        <p class="pref-subtitle" id="subheading-pref">
+            여행지 먹거리 추천 및 식당 테마 선정에 활용됩니다.<br>
+            자신의 평소 입맛과 매칭되는 취향을 골라주세요. (중복 선택 가능 / 선택 항목)
+        </p>
+
+        <form method="POST" action="{% url 'accounts:preference_step' step_num=4 %}" id="preference-form-step">
+            {% csrf_token %}
+            
+            <!-- Dynamic Choice Tag Grid (High Maintainability) -->
+            <div class="choices-grid" id="choices-selection-grid">
+                {% for choice in choices %}
+                    <label class="tag-option">
+                        <input type="checkbox" name="taste_choices" value="{{ choice.id }}"
+                               {% if choice in user_pref.choices.all %}checked{% endif %}>
+                        <div class="tag-card">
+                            <i class="fa-solid fa-circle-check check-indicator"></i>
+                            <span>{{ choice.name }}</span>
+                        </div>
+                    </label>
+                {% empty %}
+                    <div style="color: var(--text-muted); font-size: 0.95rem; text-align: center; width: 100%;">
+                        가용 가능한 입맛 취향 정보가 데이터베이스에 존재하지 않습니다.
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Wizard Actions Grid -->
+            <div class="actions-grid" id="wizard-actions-container">
+                <button type="submit" name="skip" value="true" class="btn-skip" id="btn-wizard-skip">
+                    다음에 입력하기
+                </button>
+                <button type="submit" class="btn-next" id="btn-wizard-next">
+                    완료하고 메인으로 <i class="fa-solid fa-circle-check"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const card = document.getElementById("pref-card-main");
+        const form = document.getElementById("preference-form-step");
+        
+        // Trigger entrance slide from right
+        if (card) {
+            card.offsetHeight; // force reflow
+            card.classList.add("slide-active");
+        }
+
+        // Intercept form submissions for transitions
+        if (form) {
+            let clickedButton = null;
+            
+            const skipBtn = document.getElementById("btn-wizard-skip");
+            const nextBtn = document.getElementById("btn-wizard-next");
+            
+            skipBtn.addEventListener("click", () => { clickedButton = "skip"; });
+            nextBtn.addEventListener("click", () => { clickedButton = "next"; });
+            
+            form.addEventListener("submit", (e) => {
+                e.preventDefault();
+                
+                let msg = "";
+                if (clickedButton === "skip") {
+                    msg = "설정을 보류하고<br>메인 화면으로 이동 중입니다...";
+                } else {
+                    msg = "선호 입맛 취향을 최종 기록하고<br>메인 화면으로 이동 중입니다...";
+                }
+                
+                premiumTransition(msg, "", 1600);
+                
+                setTimeout(() => {
+                    if (clickedButton === "skip") {
+                        const skipInput = document.createElement("input");
+                        skipInput.type = "hidden";
+                        skipInput.name = "skip";
+                        skipInput.value = "true";
+                        form.appendChild(skipInput);
+                    }
+                    form.submit();
+                }, 1500);
+            });
+        }
+    });
+</script>
+{% endblock %}

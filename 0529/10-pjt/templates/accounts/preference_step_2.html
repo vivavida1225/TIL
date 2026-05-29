@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+{% block title %}여행 취향 설문 (2/4) - 야무짐{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pref-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 550px;
+        margin: 0 auto;
+    }
+
+    .pref-card {
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Wizard Progress Bar */
+    .wizard-progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        position: relative;
+    }
+
+    .wizard-progress::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--border-color);
+        z-index: 0;
+        transform: translateY(-50%);
+    }
+
+    .progress-bar-fill {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 25%; /* Step 2 is 25% filled */
+        height: 2px;
+        background: var(--primary-color);
+        box-shadow: 0 0 10px var(--primary-color);
+        z-index: 1;
+        transform: translateY(-50%);
+        transition: width 0.5s ease;
+    }
+
+    .progress-step {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--bg-color);
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        z-index: 2;
+        transition: all 0.4s ease;
+    }
+
+    .progress-step.active {
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+        background: rgba(0, 229, 255, 0.1);
+    }
+
+    .progress-step.complete {
+        border-color: var(--primary-color);
+        color: white;
+        background: var(--primary-color);
+        box-shadow: 0 0 10px rgba(124, 77, 255, 0.3);
+    }
+
+    .pref-icon-container {
+        font-size: 2.8rem;
+        background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.75rem;
+        text-align: center;
+    }
+
+    .pref-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-align: center;
+        background: linear-gradient(to right, #ffffff, #c7d2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .pref-subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 2.5rem;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    /* Premium Range Slider Styling */
+    .slider-container {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        margin-bottom: 2.5rem;
+        text-align: center;
+    }
+
+    .slider-header {
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+
+    .range-slider-wrapper {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .range-slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 8px;
+        border-radius: 50px;
+        background: rgba(255, 255, 255, 0.08);
+        outline: none;
+        transition: background 0.3s;
+    }
+
+    /* Webkit (Chrome, Safari, Edge) Slider thumb */
+    .range-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--accent-color);
+        border: 2px solid white;
+        cursor: pointer;
+        box-shadow: 0 0 15px var(--accent-color);
+        transition: transform 0.1s, background-color 0.2s;
+    }
+
+    .range-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+    }
+
+    /* Firefox Slider thumb */
+    .range-slider::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--accent-color);
+        border: 2px solid white;
+        cursor: pointer;
+        box-shadow: 0 0 15px var(--accent-color);
+        transition: transform 0.1s, background-color 0.2s;
+    }
+
+    .range-slider::-moz-range-thumb:hover {
+        transform: scale(1.2);
+    }
+
+    /* Slider value display */
+    .slider-val-badge {
+        display: inline-block;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--accent-color);
+        text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+        margin-bottom: 0.5rem;
+    }
+
+    .slider-desc {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 1rem;
+    }
+
+    /* Action buttons grid */
+    .actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 1rem;
+    }
+
+    .btn-skip {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 0.94rem;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+    }
+
+    .btn-skip:hover {
+        background: rgba(255, 82, 82, 0.08);
+        border-color: rgba(255, 82, 82, 0.25);
+        color: #ff5252;
+    }
+
+    .btn-next {
+        background: linear-gradient(135deg, var(--primary-color), #4a148c);
+        color: white;
+        font-weight: 700;
+        border: none;
+        padding: 0.94rem;
+        border-radius: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(124, 77, 255, 0.3);
+    }
+
+    .btn-next:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(124, 77, 255, 0.5);
+    }
+
+    .btn-next:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(124, 77, 255, 0.25);
+    }
+
+    /* Horizontal Slide Card Transition */
+    .pref-card {
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+    }
+    
+    .pref-card.slide-init {
+        transform: translateX(100vw) scale(0.95);
+        opacity: 0;
+    }
+
+    .pref-card.slide-active {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+
+    .pref-card.slide-exit {
+        transform: translateX(-100vw) scale(0.95);
+        opacity: 0;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pref-wrapper" id="pref-container-wrapper">
+    <div class="glass-card pref-card slide-init" id="pref-card-main">
+        
+        <!-- Progress steps indicator -->
+        <div class="wizard-progress" id="progress-wizard">
+            <div class="progress-bar-fill" id="progress-fill" style="width: 25%;"></div>
+            <div class="progress-step complete">1</div>
+            <div class="progress-step active">2</div>
+            <div class="progress-step">3</div>
+            <div class="progress-step">4</div>
+        </div>
+
+        <div class="pref-icon-container" id="pref-brand-icon">
+            <i class="fa-solid fa-umbrella"></i>
+        </div>
+        <h2 class="pref-title" id="heading-pref">2. 상황 대비성 설정</h2>
+        <p class="pref-subtitle" id="subheading-pref">
+            여행 중 발생할 수 있는 여러 돌발 상황의 대비성 수준을 설정합니다.<br>
+            (비상 약, 물에 젖을 것 대비, 여행자보험 가입성 등) (선택 항목)
+        </p>
+
+        <form method="POST" action="{% url 'accounts:preference_step' step_num=2 %}" id="preference-form-step">
+            {% csrf_token %}
+            
+            <div class="slider-container" id="slider-container-card">
+                <div class="slider-header">
+                    <span>즉흥 추구 (자유로움)</span>
+                    <span>철저 대비 (안전제일)</span>
+                </div>
+                
+                <div class="range-slider-wrapper">
+                    <input type="range" id="preparedness" name="preparedness" 
+                           class="range-slider" min="1" max="10" 
+                           value="{{ user_pref.preparedness|default:5 }}">
+                </div>
+
+                <div>
+                    <span class="slider-val-badge" id="slider-val-num">5</span>
+                    <span style="color: var(--text-muted); font-size: 1.2rem; font-weight: 700;">/ 10</span>
+                </div>
+                
+                <div class="slider-desc" id="slider-desc-text">
+                    상황이 닥치면 현지에서 어떻게든 해결할 수 있다고 긍정적으로 생각합니다.
+                </div>
+            </div>
+
+            <!-- Wizard Actions Grid -->
+            <div class="actions-grid" id="wizard-actions-container">
+                <button type="submit" name="skip" value="true" class="btn-skip" id="btn-wizard-skip">
+                    다음에 입력하기
+                </button>
+                <button type="submit" class="btn-next" id="btn-wizard-next">
+                    저장하고 다음으로 <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const slider = document.getElementById("preparedness");
+        const valBadge = document.getElementById("slider-val-num");
+        const descText = document.getElementById("slider-desc-text");
+        const card = document.getElementById("pref-card-main");
+        const form = document.getElementById("preference-form-step");
+        
+        // Trigger entrance slide from right
+        if (card) {
+            card.offsetHeight; // force reflow
+            card.classList.add("slide-active");
+        }
+
+        // Detailed feedback strings based on slider value
+        const descriptions = {
+            1: "가장 최소한의 짐만 가볍게 챙기며 돌발 상황은 여행의 일부라고 생각하고 즐깁니다.",
+            2: "여권과 스마트폰만 있으면 나머지는 현지에서 모두 구한다는 완전 즉흥 마인드입니다.",
+            3: "비상 약 등은 챙기지 않으며 돌발 상황이 생겨도 유연하게 넘기는 긍정파입니다.",
+            4: "비교적 즉흥적인 편이나 기본적인 상비약 세트 정도는 서랍장에서 대충 챙깁니다.",
+            5: "상황이 닥치면 어떻게든 해결할 수 있다고 믿으며 무난하게 짐을 구성합니다.",
+            6: "여행자보험에 대해 관심을 가지며 혹시 비가 올 상황에 대비해 작은 우산 정도는 갖춥니다.",
+            7: "다양한 옷가지(물놀이 대비 등)나 가벼운 감기약, 멀미약 등을 꼼꼼하게 설계해 넣습니다.",
+            8: "여행자 보험을 가입하고 아플 때 먹을 약 종류별 구비, 물에 젖을 것 대비 방수팩 등을 챙깁니다.",
+            9: "동선과 기후 조건(사막, 설산 등)을 전방위 대비하고 예비 안경, 여벌 보조 배터리까지 확실히 갖춥니다.",
+            10: "우주급 완벽대비! 3중 방수 대책, 비상약 완전체, 여권 사본 및 여행자보험 지참 등 철저히 보안을 유지합니다."
+        };
+
+        function updateSlider(val) {
+            valBadge.textContent = val;
+            descText.textContent = descriptions[val] || "";
+            
+            // Neon color shift based on value intensity
+            const intensity = (val - 1) / 9; // 0 to 1
+            const r = Math.round(0 + (124 - 0) * intensity);
+            const g = Math.round(229 + (77 - 229) * intensity);
+            const b = Math.round(255 + (255 - 255) * intensity);
+            const color = `rgb(${r}, ${g}, ${b})`;
+            valBadge.style.color = color;
+            valBadge.style.textShadow = `0 0 20px ${color}66`;
+        }
+
+        // Initialize values
+        updateSlider(slider.value);
+
+        // Input listener
+        slider.addEventListener("input", (e) => {
+            updateSlider(e.target.value);
+        });
+
+        // Intercept form submissions for transitions
+        if (form) {
+            let clickedButton = null;
+            
+            const skipBtn = document.getElementById("btn-wizard-skip");
+            const nextBtn = document.getElementById("btn-wizard-next");
+            
+            skipBtn.addEventListener("click", () => { clickedButton = "skip"; });
+            nextBtn.addEventListener("click", () => { clickedButton = "next"; });
+            
+            form.addEventListener("submit", (e) => {
+                e.preventDefault();
+                
+                // Trigger exit slide to left
+                if (card) {
+                    card.classList.remove("slide-active");
+                    card.classList.add("slide-exit");
+                }
+                
+                let msg = "";
+                if (clickedButton === "skip") {
+                    msg = "설정을 보류하고<br>다음 단계로 이동 중입니다...";
+                } else {
+                    msg = "상황 대비성을 기록하고<br>다음 단계로 이동 중입니다...";
+                }
+                
+                premiumTransition(msg, "", 1600);
+                
+                // Submit form programmatically after animation completes (1500ms)
+                setTimeout(() => {
+                    if (clickedButton === "skip") {
+                        const skipInput = document.createElement("input");
+                        skipInput.type = "hidden";
+                        skipInput.name = "skip";
+                        skipInput.value = "true";
+                        form.appendChild(skipInput);
+                    }
+                    form.submit();
+                }, 1500);
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cat API (Async/Await)</title>
+</head>
+
+<body>
+  <button>냥냥펀치</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const btn = document.querySelector('button')
+
+    // 함수 앞에 async 키워드 추가
+    const getCats = async function () {
+      
+      // 에러 처리를 위해 try-catch 블록 사용
+      try {
+        // Promise 객체를 반환하는 axios 함수 앞에 await를 붙여서, 결과가 반환될 때까지 대기 
+        const response = await axios({
+          method: 'get',
+          url: 'https://api.thecatapi.com/v1/images/search'
+        })
+
+        // 4. 첫 번째 .then에서 하던 일 (데이터 가져오기)
+        // await 덕분에 response 변수를 바로 사용할 수 있음
+        const imgUrl = response.data[0].url
+
+        // 5. 두 번째 .then에서 하던 일 (화면 그리기)
+        const imgElem = document.createElement('img')
+        imgElem.setAttribute('src', imgUrl)
+        document.body.appendChild(imgElem)
+
+        // [주의!] 원래 코드에서는 이 로그가 요청 보내자마자(이미지 뜨기 전) 나왔지만,
+        // async/await에서는 여기까지 순서대로 실행되므로 "이미지가 뜬 뒤에" 나옵니다.
+        // 결국 async/await 는 코드가 우리가 읽는 순서(위 -> 아래)대로 정확하게 실행시킨다는 장점이 있음 
+        console.log('야옹야옹')
+
+      } catch (error) {
+        console.log(error)
+        console.log('실패했다옹')
+      }
+    }
+
+    btn.addEventListener('click', getCats)
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+</head>
+<body>
+  <section>
+    <article class="card" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title">Card title</h5>
+        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+      </div>
+    </article>
+    <!-- 아래에 새로운 card 생성 및 추가 -->
+  </section>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+  <script>
+    const sectionTag = document.querySelector('body > section')
+    const oldArticle = document.querySelector('section > article')
+
+    // 새 article 생성 후 각 tag 별 변수 정의
+    const newArticle = document.createElement('article')
+    newArticle.classList.add('card')
+    newArticle.style.width = '18rem'
+
+    const divTag = document.createElement('div')
+    divTag.classList.add('card-body')
+
+    const h5Tag = document.createElement('h5')
+    h5Tag.classList.add('card-title')
+    h5Tag.textContent = 'Card title'
+
+    const pTag = document.createElement('p')
+    pTag.classList.add('card-text')
+    pTag.textContent = "Some quick example text to build on the card title and make up the bulk of the card's content."
+
+    // 각 태그들의 관계 형성
+    divTag.appendChild(h5Tag)
+    divTag.appendChild(pTag)
+    newArticle.appendChild(divTag)
+
+    // section 에 새 article 추가
+    sectionTag.appendChild(newArticle)
+    sectionTag.removeChild(oldArticle)
+
+    console.log('hello')
+  </script>
+
+</body>
+</html>

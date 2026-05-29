@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% block title %}추가 정보 입력 - 야무짐{% endblock %}
+
+{% block extra_css %}
+<style>
+    .info-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .info-card {
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .info-icon-container {
+        font-size: 3rem;
+        background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .info-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.75rem;
+        text-align: center;
+        background: linear-gradient(to right, #ffffff, #c7d2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .info-subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 1.75rem;
+        text-align: left;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text-main);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .required-badge {
+        color: #ff5252;
+        font-size: 0.8rem;
+    }
+
+    /* Custom Radio Cards for Gender */
+    .gender-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
+
+    .gender-option {
+        position: relative;
+    }
+
+    .gender-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .gender-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        padding: 1rem 0.5rem;
+        border-radius: 16px;
+        text-align: center;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--text-muted);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .gender-card i {
+        font-size: 1.5rem;
+    }
+
+    .gender-option input[type="radio"]:checked + .gender-card {
+        background: rgba(124, 77, 255, 0.15);
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.35);
+        transform: translateY(-3px);
+    }
+
+    .gender-card:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.15);
+        color: var(--text-main);
+    }
+
+    /* Premium Glow Date Input */
+    .date-input-wrapper {
+        position: relative;
+    }
+
+    .form-input-date {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 0.9rem 1.2rem;
+        color: var(--text-main);
+        font-family: inherit;
+        font-size: 1rem;
+        outline: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .form-input-date:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 15px rgba(124, 77, 255, 0.3);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Submit Button */
+    .btn-submit {
+        background: linear-gradient(135deg, var(--primary-color), #4a148c);
+        color: white;
+        font-weight: 700;
+        width: 100%;
+        padding: 0.94rem 1.5rem;
+        border-radius: 16px;
+        border: none;
+        font-size: 1.05rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(124, 77, 255, 0.3);
+        margin-top: 2rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(124, 77, 255, 0.5);
+    }
+
+    .btn-submit:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(124, 77, 255, 0.25);
+    }
+
+    .alert-error {
+        background: rgba(255, 82, 82, 0.1);
+        border: 1px solid rgba(255, 82, 82, 0.2);
+        color: #ff5252;
+        padding: 0.8rem 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        text-align: center;
+        font-weight: 500;
+    }
+
+    /* Horizontal Slide Card Transition */
+    .info-card {
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+    }
+    
+    .info-card.slide-init {
+        transform: translateX(100vw) scale(0.95);
+        opacity: 0;
+    }
+
+    .info-card.slide-active {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+
+    .info-card.slide-exit {
+        transform: translateX(-100vw) scale(0.95);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .form-input-text {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 0.9rem 1.2rem;
+        color: var(--text-main);
+        font-family: inherit;
+        font-size: 1rem;
+        outline: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-sizing: border-box;
+    }
+
+    .form-input-text:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 15px rgba(124, 77, 255, 0.3);
+        background: rgba(255, 255, 255, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="info-wrapper" id="info-container-wrapper">
+    <div class="glass-card info-card slide-init" id="info-card-main">
+        <div class="info-icon-container" id="info-brand-icon">
+            <i class="fa-solid fa-circle-user"></i>
+        </div>
+        <h2 class="info-title" id="heading-info">추가 프로필 연동</h2>
+        <p class="info-subtitle" id="subheading-info">
+            {{ user.first_name|default:user.username }} 님을 위한 맞춤형 여행 코스 추천을 위해<br>
+            성별과 생년월일을 입력해 주세요. (필수 항목)
+        </p>
+
+        {% if error %}
+            <div class="alert-error" id="info-validation-error">
+                <i class="fa-solid fa-triangle-exclamation"></i> {{ error }}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'accounts:additional_info' %}" id="additional-info-form">
+            {% csrf_token %}
+            
+            <!-- 0. 사용할 닉네임 입력 -->
+            <div class="form-group">
+                <label class="form-label" for="nickname">
+                    사용할 닉네임 <span class="required-badge"><i class="fa-solid fa-asterisk"></i> 필수</span>
+                </label>
+                <div class="date-input-wrapper">
+                    <input type="text" id="nickname" name="nickname" required 
+                           class="form-input-text" placeholder="서비스에서 사용할 고유 닉네임 입력"
+                           minlength="2" maxlength="15" autocomplete="off"
+                           value="{{ user.nickname|default:user.first_name }}">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.45rem; display: block; padding-left: 0.2rem; line-height: 1.4;">
+                        <i class="fa-solid fa-circle-info"></i> 2자에서 15자 사이의 중복 없는 닉네임을 설정해 주세요.
+                    </span>
+                </div>
+            </div>
+            
+            <!-- 1. 성별 선택 -->
+            <div class="form-group">
+                <label class="form-label">
+                    성별 <span class="required-badge"><i class="fa-solid fa-asterisk"></i> 필수</span>
+                </label>
+                <div class="gender-grid" id="gender-selection-grid">
+                    <label class="gender-option">
+                        <input type="radio" name="gender" value="남성" required {% if user.gender == "남성" %}checked{% endif %}>
+                        <div class="gender-card">
+                            <i class="fa-solid fa-mars"></i>
+                            <span>남성</span>
+                        </div>
+                    </label>
+                    <label class="gender-option">
+                        <input type="radio" name="gender" value="여성" required {% if user.gender == "여성" %}checked{% endif %}>
+                        <div class="gender-card">
+                            <i class="fa-solid fa-venus"></i>
+                            <span>여성</span>
+                        </div>
+                    </label>
+                    <label class="gender-option">
+                        <input type="radio" name="gender" value="기타" required {% if user.gender == "기타" %}checked{% endif %}>
+                        <div class="gender-card">
+                            <i class="fa-solid fa-genderless"></i>
+                            <span>기타</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 2. 생년월일 입력 -->
+            <div class="form-group">
+                <label class="form-label" for="birth_date">
+                    생년월일 <span class="required-badge"><i class="fa-solid fa-asterisk"></i> 필수</span>
+                </label>
+                <div class="date-input-wrapper">
+                    <input type="date" id="birth_date" name="birth_date" required 
+                           class="form-input-date" 
+                           value="{{ user.birth_date|date:'Y-m-d' }}">
+                </div>
+            </div>
+
+            <!-- 제출 버튼 -->
+            <button type="submit" class="btn-submit" id="btn-save-info">
+                여행 취향 입력하기 <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const card = document.getElementById("info-card-main");
+        const form = document.getElementById("additional-info-form");
+        
+        // Trigger entrance slide
+        if (card) {
+            card.offsetHeight; // force reflow
+            card.classList.add("slide-active");
+        }
+
+        if (form) {
+            form.addEventListener("submit", (e) => {
+                if (form.checkValidity()) {
+                    e.preventDefault();
+                    
+                    // Trigger exit slide to left
+                    if (card) {
+                        card.classList.remove("slide-active");
+                        card.classList.add("slide-exit");
+                    }
+                    
+                    premiumTransition("추가 프로필 정보를 기록하고<br>취향 설문 화면으로 이동 중입니다...", "", 1600);
+                    
+                    setTimeout(() => {
+                        form.submit();
+                    }, 1500);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

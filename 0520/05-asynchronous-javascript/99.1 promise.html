@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<script>
+    // axios 는 이미 Promise를 예쁘게 포장해서 건네주는 라이브러리
+    // 실무에서 직접적으로 setTimeout과 같은 비동기 함수를 직접 Promise로 감싸야 하는 순간이 옴
+
+    // Promise 객체를 직접 만들고, 반환하는 비동기 함수를 만들어보자.
+    // 예시) 랜덤으로 실패하는 함수
+    function getRandomData() {
+        return new Promise((resolve, reject) => {
+            const success = Math.random() > 0.5;
+            
+            setTimeout(() => {
+            if (success) {
+                resolve("데이터 도착!"); // 성공 -> .then
+            } else {
+                reject("에러 발생!"); // 실패 -> .catch
+            }
+            }, 1000);
+        });
+    }
+    
+    /////////////////////////////////////////////////////
+    // 랜덤으로 실패하는 함수를 호출
+    getRandomData()
+    .then(data => console.log(data))
+    .catch(err => console.log(err));
+
+
+    ////////////////////////////////
+    // 3번 연속 호출해야 하는 경우 
+    getRandomData()
+    .then(data1 => {
+        console.log("1번째 성공:", data1);
+        console.log("--- 2. 시도 시작 ---");
+        return getRandomData(); 
+    })
+    .then(data2 => {
+        console.log("2번째 성공:", data2);
+        console.log("--- 3. 시도 시작 ---");
+        return getRandomData();
+    })
+    .then(data3 => {
+        console.log("3번째 성공:", data3);
+        console.log("=== 모든 작업 완료 ===");
+    })
+    .catch(err => {
+        // 1, 2, 3번 중 하나라도 실패하면 바로 여기로 옴
+        console.log("중간에 실패함:", err);
+    });
+
+</script>
+</body>
+</html>

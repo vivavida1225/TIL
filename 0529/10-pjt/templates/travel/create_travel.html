@@ -1,0 +1,674 @@
+{% extends 'base.html' %}
+{% block title %}여행 준비 - 새로운 일정 등록{% endblock %}
+
+{% block extra_css %}
+<style>
+    .travel-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .travel-card {
+        width: 100%;
+        position: relative;
+        overflow: visible;
+        padding: 3rem;
+    }
+
+    .travel-icon-container {
+        font-size: 2.8rem;
+        background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.75rem;
+        text-align: center;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+
+    .travel-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-align: center;
+        background: linear-gradient(to right, #ffffff, #c7d2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .travel-subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 2.5rem;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    /* Back Link */
+    .back-to-dashboard {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .back-to-dashboard:hover {
+        color: var(--accent-color);
+        transform: translateX(-4px);
+    }
+
+    /* Custom Form Layout */
+    .form-group {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: white;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Autocomplete Multi-select Dropdown */
+    .select-search-container {
+        position: relative;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 0.4rem;
+    }
+
+    .select-search-container.focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .search-input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: white;
+        font-size: 0.95rem;
+        padding: 0.6rem 0.8rem;
+        box-sizing: border-box;
+    }
+
+    .search-input::placeholder {
+        color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Selected Items Tag Grid */
+    .selected-tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .selected-tags-container:empty {
+        display: none;
+    }
+
+    .tag-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes scaleIn {
+        from { transform: scale(0.7); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .tag-badge.neon-cyan {
+        background: rgba(0, 229, 255, 0.12);
+        color: var(--accent-color);
+        border: 1px solid rgba(0, 229, 255, 0.35);
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+    }
+
+    .tag-badge.neon-purple {
+        background: rgba(124, 77, 255, 0.15);
+        color: #c7d2fe;
+        border: 1px solid rgba(124, 77, 255, 0.4);
+        box-shadow: 0 0 10px rgba(124, 77, 255, 0.2);
+    }
+
+    .tag-badge .remove-btn {
+        cursor: pointer;
+        opacity: 0.6;
+        transition: all 0.2s ease;
+        font-size: 0.8rem;
+    }
+
+    .tag-badge .remove-btn:hover {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+
+    /* Dropdown Items Menu */
+    .dropdown-list-container {
+        position: absolute;
+        top: 105%;
+        left: 0;
+        width: 100%;
+        max-height: 220px;
+        overflow-y: auto;
+        background: rgba(20, 16, 38, 0.95);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        z-index: 100;
+        display: none;
+        backdrop-filter: blur(15px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .dropdown-item {
+        padding: 0.75rem 1.2rem;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+    }
+
+    .dropdown-item.selected {
+        background: rgba(0, 229, 255, 0.05);
+        color: var(--accent-color);
+        pointer-events: none;
+    }
+
+    /* Date Picker Row */
+    .date-inputs-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+    }
+
+    .date-input-field {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 500;
+        padding: 0.85rem 1.2rem;
+        border-radius: 16px;
+        outline: none;
+        width: 100%;
+        box-sizing: border-box;
+        transition: all 0.3s ease;
+        color-scheme: dark; /* custom calendar icon in modern browser dark mode */
+    }
+
+    .date-input-field:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    /* City Select Disabled State Styling */
+    .select-search-container.disabled {
+        opacity: 0.45;
+        pointer-events: none;
+        background: rgba(255, 255, 255, 0.005);
+    }
+
+    /* Action Buttons */
+    .btn-submit-travel {
+        background: linear-gradient(135deg, var(--primary-color), #4a148c);
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        border: none;
+        width: 100%;
+        padding: 1rem;
+        border-radius: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(124, 77, 255, 0.3);
+        margin-top: 1rem;
+    }
+
+    .btn-submit-travel:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(124, 77, 255, 0.55);
+    }
+
+    .btn-submit-travel:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(124, 77, 255, 0.2);
+    }
+
+    /* Entrance Animation */
+    .travel-card {
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+    }
+
+    .travel-card.slide-init {
+        transform: translateX(100vw) scale(0.95);
+        opacity: 0;
+    }
+
+    .travel-card.slide-active {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="travel-wrapper" id="travel-content-wrapper">
+    <div class="glass-card travel-card slide-init" id="travel-card-main">
+        
+        <!-- Back Dashboard Link -->
+        <a href="{% url 'home' %}" class="back-to-dashboard" id="btn-back-home">
+            <i class="fa-solid fa-arrow-left"></i> 대시보드로 돌아가기
+        </a>
+
+        <div class="travel-icon-container" id="travel-brand-icon">
+            <i class="fa-solid fa-jet-fighter"></i>
+        </div>
+        
+        <h2 class="travel-title" id="heading-travel">새로운 여정 준비</h2>
+        <p class="travel-subtitle" id="subheading-travel">
+            함께 가고 싶은 나라와 도시를 선택하고,<br>
+            여행 기간을 등록해 야무짐 플래닝 공간을 생성하세요!
+        </p>
+
+        <form method="POST" action="{% url 'travel:create_travel' %}" id="travel-form-create">
+            {% csrf_token %}
+
+            <!-- 1. 국가 다중 선택 및 검색 필터 (Dynamic Search & Multi Select) -->
+            <div class="form-group" id="group-country-select">
+                <label class="form-label" for="country-search-box">목적지 국가 (복수 선택 가능)</label>
+                <div class="select-search-container" id="country-select-wrapper">
+                    <!-- Selected country badges are placed here -->
+                    <div class="selected-tags-container" id="container-selected-countries"></div>
+                    
+                    <input type="text" class="search-input" id="country-search-box" 
+                           placeholder="국가명을 입력해서 검색하고 선택하세요..." autocomplete="off">
+                    
+                    <!-- Dropdown List Countries -->
+                    <div class="dropdown-list-container" id="dropdown-countries-list">
+                        {% for country in countries %}
+                            <div class="dropdown-item" data-id="{{ country.id }}" data-name="{{ country.name }}">
+                                <span>{{ country.name }}</span>
+                                <i class="fa-solid fa-plus" style="font-size: 0.8rem; opacity: 0.5;"></i>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 도시 다중 선택 및 상호 의존형 검색 필터 (Dependent Autocomplete Multi Select) -->
+            <div class="form-group" id="group-city-select">
+                <label class="form-label" for="city-search-box">방문 도시 (복수 선택 가능)</label>
+                <div class="select-search-container disabled" id="city-select-wrapper">
+                    <!-- Selected city badges are placed here -->
+                    <div class="selected-tags-container" id="container-selected-cities"></div>
+                    
+                    <input type="text" class="search-input" id="city-search-box" 
+                           placeholder="국가를 먼저 선택해 주세요..." autocomplete="off" disabled>
+                    
+                    <!-- Dropdown List Cities (dynamically populated) -->
+                    <div class="dropdown-list-container" id="dropdown-cities-list"></div>
+                </div>
+            </div>
+
+            <!-- 3. 여행 기간 (Start & End Dates Range Selection) -->
+            <div class="form-group" id="group-dates-select">
+                <label class="form-label">여행 기간 설정</label>
+                <div class="date-inputs-grid">
+                    <div>
+                        <span class="form-label" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem;">출발일</span>
+                        <input type="date" name="start_date" id="input-start-date" class="date-input-field" required>
+                    </div>
+                    <div>
+                        <span class="form-label" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem;">도착일</span>
+                        <input type="date" name="end_date" id="input-end-date" class="date-input-field" required disabled>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Hidden Fields to submit selected entities IDs list -->
+            <div id="hidden-inputs-area" style="display:none;"></div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit-travel" id="btn-submit-travel-form">
+                완벽한 일정 생성하기 <i class="fa-solid fa-circle-check"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Server-injected mapping of Country ID -> List of Cities [{id, name}, ...]
+    const countryCityMap = JSON.parse('{{ country_city_map_json|escapejs }}');
+    
+    // Track selected countries and cities
+    const selectedCountries = new Set();
+    const selectedCities = new Set();
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const card = document.getElementById("travel-card-main");
+        const form = document.getElementById("travel-form-create");
+        
+        // 1. Entrance Spring Easing Transition
+        if (card) {
+            card.offsetHeight; // force reflow
+            card.classList.add("slide-active");
+        }
+
+        // --- COUNTRIES AUTOCOMPLETE COMPONENT ---
+        const countryWrapper = document.getElementById("country-select-wrapper");
+        const countrySearch = document.getElementById("country-search-box");
+        const countryDropdown = document.getElementById("dropdown-countries-list");
+        const selectedCountriesContainer = document.getElementById("container-selected-countries");
+        const hiddenInputsArea = document.getElementById("hidden-inputs-area");
+        
+        // Show countries dropdown on focus
+        countrySearch.addEventListener("focus", () => {
+            countryWrapper.classList.add("focus");
+            countryDropdown.style.display = "block";
+            filterCountries();
+        });
+
+        // Hide dropdown when clicking outside
+        document.addEventListener("click", (e) => {
+            if (!countryWrapper.contains(e.target)) {
+                countryDropdown.style.display = "none";
+                countryWrapper.classList.remove("focus");
+            }
+        });
+
+        // Type to Search & Narrow Down
+        countrySearch.addEventListener("input", filterCountries);
+
+        function filterCountries() {
+            const query = countrySearch.value.trim().toLowerCase();
+            const items = countryDropdown.getElementsByClassName("dropdown-item");
+            
+            for (let item of items) {
+                const name = item.dataset.name.toLowerCase();
+                const id = item.dataset.id;
+                
+                if (selectedCountries.has(id)) {
+                    item.style.display = "none"; // Hide if already selected
+                } else if (name.includes(query)) {
+                    item.style.display = "flex";
+                } else {
+                    item.style.display = "none";
+                }
+            }
+        }
+
+        // Selecting a Country
+        const countryItems = countryDropdown.getElementsByClassName("dropdown-item");
+        for (let item of countryItems) {
+            item.addEventListener("click", (e) => {
+                const id = item.dataset.id;
+                const name = item.dataset.name;
+                
+                addCountryTag(id, name);
+                
+                countrySearch.value = "";
+                countryDropdown.style.display = "none";
+                countrySearch.blur();
+            });
+        }
+
+        function addCountryTag(id, name) {
+            if (selectedCountries.has(id)) return;
+            selectedCountries.add(id);
+            
+            // Create visible Badge
+            const badge = document.createElement("span");
+            badge.className = "tag-badge neon-cyan";
+            badge.id = `badge-country-${id}`;
+            badge.innerHTML = `${name} <i class="fa-solid fa-xmark remove-btn"></i>`;
+            
+            badge.querySelector(".remove-btn").addEventListener("click", () => {
+                removeCountryTag(id);
+            });
+            
+            selectedCountriesContainer.appendChild(badge);
+            
+            // Create hidden input field
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "countries";
+            input.value = id;
+            input.id = `input-country-${id}`;
+            hiddenInputsArea.appendChild(input);
+            
+            // Trigger City Dropdown Update
+            updateCityDropdown();
+        }
+
+        function removeCountryTag(id) {
+            selectedCountries.delete(id);
+            
+            const badge = document.getElementById(`badge-country-${id}`);
+            if (badge) badge.remove();
+            
+            const input = document.getElementById(`input-country-${id}`);
+            if (input) input.remove();
+            
+            // Remove any selected cities belonging to this country
+            if (countryCityMap[id]) {
+                const countryCities = countryCityMap[id];
+                for (let c of countryCities) {
+                    removeCityTag(c.id.toString());
+                }
+            }
+            
+            // Trigger City Dropdown Update
+            updateCityDropdown();
+        }
+
+        window.removeCountry = removeCountryTag; // Expose globally for simplicity
+
+
+        // --- CITIES DEPENDENT AUTOCOMPLETE COMPONENT ---
+        const cityWrapper = document.getElementById("city-select-wrapper");
+        const citySearch = document.getElementById("city-search-box");
+        const cityDropdown = document.getElementById("dropdown-cities-list");
+        const selectedCitiesContainer = document.getElementById("container-selected-cities");
+
+        citySearch.addEventListener("focus", () => {
+            if (selectedCountries.size === 0) return;
+            cityWrapper.classList.add("focus");
+            cityDropdown.style.display = "block";
+            filterCities();
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!cityWrapper.contains(e.target)) {
+                cityDropdown.style.display = "none";
+                cityWrapper.classList.remove("focus");
+            }
+        });
+
+        citySearch.addEventListener("input", filterCities);
+
+        function filterCities() {
+            const query = citySearch.value.trim().toLowerCase();
+            const items = cityDropdown.getElementsByClassName("dropdown-item");
+            
+            for (let item of items) {
+                const name = item.dataset.name.toLowerCase();
+                const id = item.dataset.id;
+                
+                if (selectedCities.has(id)) {
+                    item.style.display = "none";
+                } else if (name.includes(query)) {
+                    item.style.display = "flex";
+                } else {
+                    item.style.display = "none";
+                }
+            }
+        }
+
+        function updateCityDropdown() {
+            cityDropdown.innerHTML = ""; // Clear list
+            
+            if (selectedCountries.size === 0) {
+                // Disable City Component
+                cityWrapper.classList.add("disabled");
+                citySearch.disabled = true;
+                citySearch.placeholder = "국가를 먼저 선택해 주세요...";
+                cityDropdown.style.display = "none";
+                return;
+            }
+            
+            // Enable City Component
+            cityWrapper.classList.remove("disabled");
+            citySearch.disabled = false;
+            citySearch.placeholder = "방문할 도시를 검색하고 선택해 주세요...";
+            
+            // Populate Dropdown list based on selected countries
+            selectedCountries.forEach(countryId => {
+                const citiesList = countryCityMap[countryId] || [];
+                citiesList.forEach(city => {
+                    const item = document.createElement("div");
+                    item.className = "dropdown-item";
+                    item.dataset.id = city.id;
+                    item.dataset.name = city.name;
+                    item.innerHTML = `<span>${city.name}</span> <i class="fa-solid fa-plus" style="font-size: 0.8rem; opacity: 0.5;"></i>`;
+                    
+                    item.addEventListener("click", () => {
+                        addCityTag(city.id.toString(), city.name);
+                        citySearch.value = "";
+                        cityDropdown.style.display = "none";
+                        citySearch.blur();
+                    });
+                    
+                    cityDropdown.appendChild(item);
+                });
+            });
+        }
+
+        function addCityTag(id, name) {
+            if (selectedCities.has(id)) return;
+            selectedCities.add(id);
+            
+            // Create visible Badge
+            const badge = document.createElement("span");
+            badge.className = "tag-badge neon-purple";
+            badge.id = `badge-city-${id}`;
+            badge.innerHTML = `${name} <i class="fa-solid fa-xmark remove-btn"></i>`;
+            
+            badge.querySelector(".remove-btn").addEventListener("click", () => {
+                removeCityTag(id);
+            });
+            
+            selectedCitiesContainer.appendChild(badge);
+            
+            // Create hidden input field
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "cities";
+            input.value = id;
+            input.id = `input-city-${id}`;
+            hiddenInputsArea.appendChild(input);
+        }
+
+        function removeCityTag(id) {
+            selectedCities.delete(id);
+            
+            const badge = document.getElementById(`badge-city-${id}`);
+            if (badge) badge.remove();
+            
+            const input = document.getElementById(`input-city-${id}`);
+            if (input) input.remove();
+        }
+
+        window.removeCity = removeCityTag; // Expose globally for simplicity
+
+
+        // --- DATE SELECTOR RANGE & VALIDATION ---
+        const startDateInput = document.getElementById("input-start-date");
+        const endDateInput = document.getElementById("input-end-date");
+        
+        // Minimum date limit is Today
+        const today = new Date().toISOString().split("T")[0];
+        startDateInput.min = today;
+        
+        startDateInput.addEventListener("change", () => {
+            if (startDateInput.value) {
+                // Enable and set minimum date limit for arrival date
+                endDateInput.disabled = false;
+                endDateInput.min = startDateInput.value;
+                
+                // If existing arrival date is before selected departure date, reset it
+                if (endDateInput.value && endDateInput.value < startDateInput.value) {
+                    endDateInput.value = startDateInput.value;
+                }
+            } else {
+                endDateInput.disabled = true;
+                endDateInput.value = "";
+            }
+        });
+
+
+        // --- STANDARD SUBMIT VALIDATION ---
+        form.addEventListener("submit", (e) => {
+            // Multi select manual check
+            if (selectedCountries.size === 0) {
+                e.preventDefault();
+                alert("목적지 국가를 최소 1개 이상 선택해 주세요.");
+                return;
+            }
+            if (selectedCities.size === 0) {
+                e.preventDefault();
+                alert("방문할 도시를 최소 1개 이상 선택해 주세요.");
+                return;
+            }
+            if (!startDateInput.value || !endDateInput.value) {
+                e.preventDefault();
+                alert("여행 일정을 완벽히 입력해 주세요.");
+                return;
+            }
+        });
+    });
+</script>
+{% endblock %}

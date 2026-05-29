@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // 동등 연산자를 활용한 조건문
+    if (0 == []) {
+      console.log('true?')
+    } else {
+      console.log('false?')
+    }
+    // 실행 결과 : true?
+    // 두 피연산자가 같은 값으로 평가되는지를 반환 (**암묵적 형변환 이후**)
+    // 객체인 [] 가 "" 로 변환됨 => 이후 ""가 0으로 변환됨
+
+    // 일치 연산자를 활용한 조건문
+    if ({} === false) {
+      console.log('true?')
+    } else {
+      console.log('false?')
+    }
+    // 실행 결과 : false?
+    // === 연산자는 타입이 다르면 false 반환 
+
+    // 논리 연산자를 활용한 단축 평가
+    console.log(0 && 13)
+    // 실행 결과 : 0
+    // 단축 평가에 의해 false 인 0을 보자마자 0 출력
+    console.log(0 || 13)
+    // 실행 결과 : 13
+    // 첫 번째 truthy 값인 13을 리턴
+
+    let num = 12
+    num /= 3
+    console.log(num)
+    // 실행 결과 : 4
+    // let 은 재할당 가능
+
+    const number = 13
+    number++
+    // 실행 결과 : Uncaught TypeError: Assignment to constant variable.
+    // const 는 재할당 불가
+
+  </script>
+</body>
+</html>

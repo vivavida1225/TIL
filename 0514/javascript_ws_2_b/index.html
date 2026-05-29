@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    const studentNames = ['John', 'Alice', 'Bob']
+    const studentAges = {
+      John: 50,
+      Alice: 100,
+      Bob: 25
+    }
+    // 아래에 코드 작성
+
+    // 방법 1.
+    // for (const student of studentNames){
+    //   console.log(student)
+    // }
+
+    // 방법 2.
+    for (let i = 0; i < 3; i++) {
+      console.log(studentNames[i])
+    }
+
+    for (const name in studentAges) {
+      console.log(studentAges[name])
+    }
+  </script>
+</body>
+
+</html>

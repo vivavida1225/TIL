@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .photos img {
+      width: 500px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1> Astronomy Picture of the Day</h1>
+  <div class="photos"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const API_URL = 'https://api.nasa.gov/planetary/apod'
+    const API_KEY = 'NiKNuzrZ3STSeWHiX3wwXTr6CLENeYbN4cCPa66M'
+    // 아래에 코드 작성
+
+    // 1. async 로 함수 작성
+    const getPicture = async function () {
+      try {
+        const response = await axios({
+          method: 'get',
+          url: `${API_URL}`,
+          params : {api_key : `${API_KEY}`},
+        })
+
+        // 2. 응답이 제대로 왔다면?
+        // console.log(response.data.url)
+        const receivedURL = response.data.url
+
+        // 2.1 img태그 생성
+        const imgTag = document.createElement('img')
+        // 2.2 class 가 photos 인 div태그 선택
+        const imageDivTag = document.querySelector('.photos') 
+        // 2.3 div태그 안에 img태그 삽입
+        imgTag.src = receivedURL
+        imageDivTag.appendChild(imgTag)
+                
+      } catch (error) {
+        console.log(error)        
+      }
+    }
+    getPicture()
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}로그인 - TravelEssentials{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 450px;
+        margin: 0 auto;
+    }
+
+    .login-card {
+        width: 100%;
+        text-align: center;
+    }
+
+    .login-icon-container {
+        font-size: 3.5rem;
+        background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1.5rem;
+        animation: pulse 2s infinite;
+    }
+
+    .login-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.75rem;
+        background: linear-gradient(to right, #ffffff, #c7d2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .login-subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 2.5rem;
+        line-height: 1.5;
+    }
+
+    /* Premium Kakao Button */
+    .btn-kakao {
+        background-color: var(--kakao-yellow);
+        color: var(--kakao-brown);
+        font-weight: 700;
+        width: 100%;
+        padding: 0.9rem 1.5rem;
+        border-radius: 16px;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(254, 229, 0, 0.2);
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-kakao::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            120deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+        );
+        transition: all 0.6s;
+    }
+
+    .btn-kakao:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(254, 229, 0, 0.4);
+    }
+
+    .btn-kakao:hover::before {
+        left: 100%;
+    }
+
+    .btn-kakao:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(254, 229, 0, 0.2);
+    }
+
+    .btn-kakao i {
+        font-size: 1.3rem;
+    }
+
+    .info-footer {
+        margin-top: 2.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+    }
+
+    .info-footer-link {
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .info-footer-link:hover {
+        color: var(--accent-color);
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-wrapper" id="login-container-wrapper">
+    <div class="glass-card login-card" id="login-card-main">
+        <div class="login-icon-container" id="login-brand-icon">
+            <i class="fa-solid fa-earth-americas"></i>
+        </div>
+        <h2 class="login-title" id="heading-login">TravelEssentials</h2>
+        <p class="login-subtitle" id="subheading-login">
+            단 한 번의 터치로 간편하게 가입하고,<br>스마트한 여행 플래닝 서비스를 지금 시작해 보세요.
+        </p>
+
+        <a href="{% url 'accounts:kakao_login' %}" class="btn-kakao" id="btn-kakao-login">
+            <i class="fa-solid fa-comment" style="color: var(--kakao-brown);"></i> 카카오톡으로 시작하기
+        </a>
+
+        <div class="info-footer" id="login-footer-links">
+            <a href="#" class="info-footer-link">개인정보처리방침</a>
+            <a href="#" class="info-footer-link">이용약관</a>
+            <a href="#" class="info-footer-link">도움말</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

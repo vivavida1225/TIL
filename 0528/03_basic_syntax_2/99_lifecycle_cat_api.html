@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Cat API with Declarative Rendering</title>
+</head>
+
+<body>
+  <div id='app'>
+    <button @click='getCatImage'>냥냥펀치</button>
+
+    <!--
+      [데이터 흐름]
+      imgUrl(ref) 값이 존재할 때만 <img> 태그가 DOM에 렌더링됨
+      - v-if: imgUrl에 값이 있을 때만 요소를 생성 (조건부 렌더링)
+      - :src (v-bind:src): imgUrl의 값을 src 속성에 바인딩
+    -->
+    <div v-if='imgUrl'>
+      <img :src='imgUrl' alt='랜덤 고양이 이미지'>
+    </div>
+  </div>
+
+  <script src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js'></script>
+  <script src='https://unpkg.com/vue@3/dist/vue.global.js'></script>
+  <script>
+    const { createApp, ref, onMounted } = Vue
+    const API_URL = 'https://api.thecatapi.com/v1/images/search'
+    const app = createApp({
+      setup() {
+        // [상태 선언] 이미지 URL을 담을 반응형 변수
+        const imgUrl = ref(null)
+
+        const getCatImage = function () {
+          axios({
+            method: 'get',
+            url: API_URL,
+          })
+            .then((response) => {
+              // imgUrl.value에 값을 할당
+              // => 템플릿이 알아서 <img>를 그려줌
+              imgUrl.value = response.data[0].url
+              console.log('새 이미지 URL:', imgUrl.value) // 흐름 추적용
+            })
+            .catch((error) => {
+              console.log('실패했다옹', error)
+            })
+        }
+
+        // mounted 시점에 첫 이미지 요청
+        onMounted(() => {
+          console.log('컴포넌트 마운트 완료 - 첫 요청 시작')
+          getCatImage()
+        })
+
+        return { imgUrl, getCatImage }
+      }
+    })
+
+    app.mount('#app')
+  </script>
+</body>
+
+</html>

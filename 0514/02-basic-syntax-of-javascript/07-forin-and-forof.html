@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    // for...in
+
+    // Array
+    // const arr1 = ['a', 'b', 'c']
+
+    // for (const elem in arr1) {
+    //   console.log(elem) // 0 1 2
+    // }
+
+    // // Object
+    // const capitals1 = {
+    //   korea: '서울',
+    //   japan: '도쿄',
+    //   china: '베이징'
+    // }
+
+    // for (const capital in capitals1) {
+    //   console.log(capital) // korea japan china
+    // }
+
+
+
+    ////////////////////////////////////////////////////////////////////// 
+
+
+
+    // for...of
+
+    // Array
+    const arr2 = ['a', 'b', 'c']
+
+    for (const elem of arr2) {
+      console.log(elem) // a b c
+    }
+
+    // Object
+    const capitals2 = {
+      korea: '서울',
+      japan: '도쿄',
+      china: '베이징',
+    }
+
+    for (const capital of capitals2) {
+      console.log(capital) // TypeError: capitals2 is not iterable
+    }
+  </script>
+</body>
+
+</html>
