@@ -8,7 +8,6 @@
 <script setup>
 import { ref } from 'vue'
 const inputColor = ref('')
-
 </script>
 
 <style scoped>

@@ -7,3 +7,6 @@ __pycache__/
 *.pyc
 .idea/
 .vscode/
+
+node_modules/
+**/node_modules/
