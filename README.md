@@ -31,7 +31,7 @@
 ## 📊 최근에 깊게 고민한 주제들 (Featured)
 *최근에 작성한 글 중 면접이나 포트폴리오에 활용할 만한 좋은 글을 링크해 두면 좋습니다.*
 
-- [Vue.js에서 컴포넌트 간 데이터 흐름 제어하기 (Props & Emit)](./Web/0605/vue-props.md)
+- [Vue.js에서 컴포넌트 간 데이터 흐름 제어하기 (Props & Emit)](./Web/0608/vue_hw_7_4/readme.md)
 
 ---
 
