@@ -11,4 +11,5 @@ __pycache__/
 node_modules/
 **/node_modules/
 
-.pdf
+# 모든 폴더의 PDF 파일 제외
+*.pdf
