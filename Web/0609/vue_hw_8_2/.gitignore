@@ -1,0 +1,15 @@
+# 모든 하위 폴더의 venv 폴더 제외
+**/venv/
+venv/
+
+# (선택) 파이썬 캐시 파일 및 에디터 설정 제외
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+
+node_modules/
+**/node_modules/
+
+# 모든 폴더의 PDF 파일 제외
+*.pdf
