@@ -8,14 +8,14 @@
 <body>
   <div id="app">
     <h1>조건문 연습하기</h1>
-    <button>Login/Logout</button>
-    <ul>
-      <li>유저네임 : </li>
-      <li>관리자여부 : </li>
-      <li>비밀번호 : </li>
+    <button @click="login">Login/Logout</button>
+    <ul v-if="isLogin">
+      <li>유저네임 : {{user.userName}} </li>
+      <li>관리자여부 : {{user.isAdmin}} </li>
+      <li>비밀번호 : {{user.passWord}} </li>
     </ul>
  </div> 
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>    
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script>
     /*
       - Vue3 CDN을 사용한다.
@@ -29,18 +29,34 @@
         - isAdmin : true
         - passWord : `1q2w3e4r`
     */
-   const {createApp, ref} = Vue
-   const app = createApp({
-    setup() {
-      const isLogin =ref(false)
+    const {createApp, ref} = Vue 
+    const app =createApp({
+      setup(){
 
-      return{
-        isLogin
+        const isLogin = ref(false)
+
+        const login = () => {
+          isLogin.value = !isLogin.value
+          console.log(`Value of isLogin has been changed to ${isLogin.value}`)
+        }
+
+        const user = ref({
+          userName : `admin`,
+          isAdmin : true,
+          passWord : `1q2w3e4r`
+        })
+
+
+
+        return {
+          isLogin,
+          login,
+          user
+
+        }
       }
-    }
-   })
-
-   app.mount('#app')
+    })
+    app.mount('#app')
   </script>
 </body>
 </html>
