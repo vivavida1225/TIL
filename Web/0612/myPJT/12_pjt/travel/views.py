@@ -1,9 +1,36 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.conf import settings
 from .models import Country, City, Travel
 from .helpers import seed_travel_countries_and_cities
 import json
+
+
+def _get_season(month):
+    if month in [3, 4, 5]:
+        return '봄'
+    elif month in [6, 7, 8]:
+        return '여름'
+    elif month in [9, 10, 11]:
+        return '가을'
+    else:
+        return '겨울'
+
+
+def _build_search_queries(cities, countries, season):
+    queries = []
+    for city in cities[:2]:
+        queries.append(f"{city} {season} 여행")
+    for city in cities[:2]:
+        queries.append(f"{city} 관광지 볼거리")
+    for country in countries[:2]:
+        queries.append(f"{country} 여행 추천")
+    if cities:
+        queries.append(f"{cities[0]} 맛집")
+    if countries:
+        queries.append(f"{countries[0]} {season} 날씨 준비물")
+    return queries
 
 @login_required
 def create_travel(request):
@@ -70,6 +97,46 @@ def create_travel(request):
         'country_city_map_json': json.dumps(country_city_map, ensure_ascii=False)
     }
     return render(request, 'travel/create_travel.html', context)
+
+@login_required
+def travel_videos(request, travel_id):
+    travel = get_object_or_404(Travel, id=travel_id, user=request.user)
+    countries = list(travel.countries.values_list('name', flat=True))
+    cities = list(travel.cities.values_list('name', flat=True))
+    season = _get_season(travel.start_date.month)
+    queries = _build_search_queries(cities, countries, season)
+
+    context = {
+        'travel': travel,
+        'countries': countries,
+        'cities': cities,
+        'season': season,
+        'search_queries_json': json.dumps(queries, ensure_ascii=False),
+        'countries_json': json.dumps(countries, ensure_ascii=False),
+        'cities_json': json.dumps(cities, ensure_ascii=False),
+        'youtube_api_key': settings.YOUTUBE_API_KEY,
+    }
+    return render(request, 'travel/travel_videos.html', context)
+
+
+@login_required
+def video_detail(request, video_id):
+    context = {
+        'video_id': video_id,
+        'youtube_api_key': settings.YOUTUBE_API_KEY,
+    }
+    return render(request, 'travel/video_detail.html', context)
+
+
+@login_required
+def saved_videos(request):
+    return render(request, 'travel/saved_videos.html')
+
+
+@login_required
+def saved_channels(request):
+    return render(request, 'travel/saved_channels.html')
+
 
 @login_required
 def delete_travel(request, travel_id):

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}저장된 채널 - 야무짐{% endblock %}
+
+{% block extra_css %}
+<style>
+  .channels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+  .channel-card { padding: 1.2rem 1.25rem !important; transition: var(--transition); }
+  .channel-card:hover { transform: translateY(-3px); border-color: rgba(0,229,255,0.25); box-shadow: 0 8px 30px rgba(0,229,255,0.08); }
+  .channel-avatar {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), #4a148c);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+    border: 2px solid rgba(124,77,255,0.3);
+  }
+  .channel-name { font-weight: 700; color: var(--text-main); font-size: 0.95rem; }
+  .channel-id { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; word-break: break-all; }
+  .btn-remove-channel {
+    padding: 0.4rem 0.85rem; border-radius: 50px; border: 1px solid rgba(255,82,82,0.2);
+    background: rgba(255,82,82,0.05); color: rgba(255,82,82,0.7);
+    font-size: 0.78rem; cursor: pointer; transition: var(--transition); flex-shrink: 0;
+  }
+  .btn-remove-channel:hover { background: rgba(255,82,82,0.15); border-color: rgba(255,82,82,0.5); color: #ff5252; }
+  .empty-state { text-align: center; padding: 5rem 0; color: var(--text-muted); }
+  .empty-icon { font-size: 3.5rem; margin-bottom: 1.25rem; opacity: 0.3; }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'home' %}" class="back-btn" style="display: inline-flex; align-items: center; gap: 0.4rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 1.5rem; transition: var(--transition);" id="back-link">
+  <i class="fa-solid fa-arrow-left"></i> 뒤로가기
+</a>
+
+<h2 style="font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #fff 40%, var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem;" id="page-title">
+  좋아하는 채널
+</h2>
+
+<div id="channels-app">
+  {% verbatim %}
+
+  <!-- 빈 상태 -->
+  <div v-if="channels.length === 0" class="empty-state" id="empty-container">
+    <div class="empty-icon"><i class="fa-solid fa-tv"></i></div>
+    <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.5rem;">등록된 채널 없음</p>
+    <p style="font-size: 0.9rem;">영상 상세 페이지에서 "채널 저장" 버튼을 눌러보세요.</p>
+    <a href="/" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; padding: 0.65rem 1.5rem; border-radius: 50px; background: linear-gradient(135deg, var(--primary-color), #4a148c); color: #fff; text-decoration: none; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(124,77,255,0.3);">
+      <i class="fa-solid fa-house"></i> 홈으로 가기
+    </a>
+  </div>
+
+  <!-- 채널 리스트 -->
+  <div v-else class="channels-grid" id="channels-grid">
+    <div
+      v-for="channel in channels"
+      :key="channel.id"
+      class="glass-card channel-card"
+      style="display: flex; align-items: center; gap: 1rem;"
+    >
+      <div class="channel-avatar">{{ channel.title.charAt(0).toUpperCase() }}</div>
+      <div style="flex: 1; overflow: hidden; min-width: 0;">
+        <p class="channel-name">{{ channel.title }}</p>
+        <p class="channel-id">{{ channel.id }}</p>
+      </div>
+      <button @click="removeChannel(channel.id)" class="btn-remove-channel">
+        <i class="fa-solid fa-trash me-1"></i>삭제
+      </button>
+    </div>
+  </div>
+
+  {% endverbatim %}
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script>
+const { createApp, ref } = Vue;
+createApp({
+  setup() {
+    const channels = ref(JSON.parse(localStorage.getItem('mytube_saved_channels') || '[]'));
+
+    function removeChannel(id) {
+      channels.value = channels.value.filter(c => c.id !== id);
+      localStorage.setItem('mytube_saved_channels', JSON.stringify(channels.value));
+    }
+
+    return { channels, removeChannel };
+  },
+}).mount('#channels-app');
+</script>
+{% endblock %}

@@ -471,7 +471,14 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="travel-info-right">
+                        <div class="travel-info-right" style="display: flex; align-items: center; gap: 0.6rem;">
+                            <a href="{% url 'travel:travel_videos' travel.id %}"
+                               class="btn btn-primary"
+                               style="padding: 0.5rem 1rem; font-size: 0.82rem; border-radius: 50px; display: inline-flex; align-items: center; gap: 0.4rem;"
+                               title="이 여행 관련 영상 추천 보기"
+                               id="btn-videos-{{ travel.id }}">
+                                <i class="fa-brands fa-youtube" style="font-size: 0.9rem;"></i> 영상 추천
+                            </a>
                             <button type="button" class="btn-delete-travel" title="여행 일정 삭제"
                                     onclick="confirmDeleteTravel('{{ travel.id }}', '{% url 'travel:delete_travel' travel.id %}');">
                                 <i class="fa-solid fa-trash-can"></i>

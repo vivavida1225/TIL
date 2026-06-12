@@ -350,6 +350,14 @@
                 <a href="{% url 'community:post_list' %}" class="nav-item" id="nav-community">
                     <i class="fa-solid fa-comments" style="font-size: 0.85rem; opacity: 0.7;"></i> 커뮤니티
                 </a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'travel:saved_videos' %}" class="nav-item" id="nav-saved-videos">
+                    <i class="fa-regular fa-clock" style="font-size: 0.85rem; opacity: 0.7;"></i> 볼 영상
+                </a>
+                <a href="{% url 'travel:saved_channels' %}" class="nav-item" id="nav-saved-channels">
+                    <i class="fa-solid fa-tv" style="font-size: 0.85rem; opacity: 0.7;"></i> 채널
+                </a>
+                {% endif %}
             </div>
 
             <div class="user-menu" id="auth-menu">

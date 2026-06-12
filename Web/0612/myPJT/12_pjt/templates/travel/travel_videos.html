@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+{% block title %}{{ season }} 여행 영상 추천 - 야무짐{% endblock %}
+
+{% block extra_css %}
+<style>
+  .season-badge {
+    display: inline-block;
+    padding: 0.25rem 0.85rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-right: 0.5rem;
+  }
+  .season-봄  { background: rgba(255,182,193,0.2); color: #ffb6c1; border: 1px solid rgba(255,182,193,0.3); }
+  .season-여름 { background: rgba(0,229,255,0.15); color: var(--accent-color); border: 1px solid rgba(0,229,255,0.3); }
+  .season-가을 { background: rgba(255,165,0,0.15); color: #ffa500; border: 1px solid rgba(255,165,0,0.3); }
+  .season-겨울 { background: rgba(173,216,230,0.15); color: #add8e6; border: 1px solid rgba(173,216,230,0.3); }
+
+  .query-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+  .query-chip {
+    padding: 0.45rem 1rem;
+    border-radius: 50px;
+    border: 1px solid var(--border-color);
+    background: rgba(255,255,255,0.05);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .query-chip:hover { background: rgba(124,77,255,0.15); border-color: var(--primary-color); color: var(--text-main); }
+  .query-chip.active { background: var(--primary-color); border-color: var(--primary-color); color: #fff; font-weight: 600; }
+
+  .search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-main);
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+  }
+  .search-input::placeholder { color: var(--text-muted); }
+  .search-bar-wrap {
+    display: flex;
+    align-items: center;
+    max-width: 580px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    padding: 0.25rem 0.25rem 0.25rem 0.75rem;
+    backdrop-filter: blur(12px);
+    transition: var(--transition);
+    margin-bottom: 2rem;
+  }
+  .search-bar-wrap:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(124,77,255,0.15); }
+
+  .videos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1.25rem;
+  }
+  .video-card {
+    cursor: pointer;
+    padding: 0 !important;
+    overflow: hidden;
+    transition: var(--transition);
+  }
+  .video-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.18); box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+  .video-thumb-wrap { position: relative; overflow: hidden; aspect-ratio: 16/9; }
+  .video-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+  .video-card:hover .video-thumb-wrap img { transform: scale(1.05); }
+  .video-play-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.35);
+    opacity: 0; transition: opacity 0.2s;
+    font-size: 2.8rem; color: rgba(255,255,255,0.9);
+  }
+  .video-card:hover .video-play-overlay { opacity: 1; }
+  .video-card-body { padding: 0.9rem 1rem; }
+  .video-card-title {
+    font-size: 0.88rem; font-weight: 600; color: var(--text-main);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    margin-bottom: 0.35rem; line-height: 1.4;
+  }
+  .video-card-channel { font-size: 0.78rem; color: var(--text-muted); }
+
+  .loading-area { text-align: center; padding: 4rem 0; }
+  .spinner {
+    width: 48px; height: 48px; border-radius: 50%;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1.5rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state { text-align: center; padding: 4rem 0; color: var(--text-muted); }
+  .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+
+  .section-title {
+    font-size: 1.1rem; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Django → JavaScript 데이터 브릿지 -->
+<script>
+  const YOUTUBE_API_KEY = '{{ youtube_api_key }}';
+  const INITIAL_QUERIES = {{ search_queries_json|safe }};
+  const TRAVEL_SEASON = '{{ season }}';
+</script>
+
+<!-- 헤더 (Django 템플릿 태그 사용 영역) -->
+<div style="margin-bottom: 2rem;">
+  <a href="{% url 'home' %}" class="back-btn" style="display: inline-flex; align-items: center; gap: 0.4rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 1.2rem; transition: var(--transition);" id="back-link">
+    <i class="fa-solid fa-arrow-left"></i> 뒤로가기
+  </a>
+  <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+    <span class="season-badge season-{{ season }}">{{ season }}</span>
+    <h2 style="font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #fff 40%, var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;" id="page-title">
+      {% for c in countries %}{{ c }}{% if not forloop.last %} · {% endif %}{% endfor %} 여행 영상 추천
+    </h2>
+  </div>
+  <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.95rem;">
+    <i class="fa-solid fa-calendar-days me-1" style="color: var(--accent-color); opacity: 0.7;"></i>
+    {{ travel.start_date|date:"Y년 n월 j일" }} ~ {{ travel.end_date|date:"n월 j일" }}
+    &nbsp;·&nbsp;
+    <i class="fa-solid fa-location-dot me-1" style="color: var(--primary-color); opacity: 0.8;"></i>
+    {% for city in cities %}{{ city }}{% if not forloop.last %}, {% endif %}{% endfor %}
+  </p>
+</div>
+
+<!-- Vue.js 앱 마운트 포인트 -->
+<div id="video-app">
+  {% verbatim %}
+
+  <!-- 추천 검색어 칩 -->
+  <div style="margin-bottom: 0.5rem;">
+    <p class="section-title">추천 검색어</p>
+    <div class="query-chips" id="query-chips-container">
+      <button
+        v-for="q in queries"
+        :key="q"
+        @click="searchByQuery(q)"
+        :class="['query-chip', { active: activeQuery === q }]"
+      >{{ q }}</button>
+    </div>
+  </div>
+
+  <!-- 직접 검색 바 -->
+  <div style="margin-bottom: 0.5rem;">
+    <p class="section-title">직접 검색</p>
+    <div class="search-bar-wrap" id="search-bar-wrapper">
+      <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted); font-size: 0.9rem; flex-shrink: 0;"></i>
+      <input
+        v-model="customQuery"
+        @keyup.enter="searchCustom"
+        class="search-input"
+        type="text"
+        placeholder="다른 키워드로 검색해보세요..."
+        id="custom-search-input"
+      />
+      <button
+        @click="searchCustom"
+        class="btn btn-primary"
+        :disabled="loading"
+        style="border-radius: 50px; padding: 0.5rem 1.25rem; font-size: 0.9rem;"
+        id="search-btn"
+      >
+        <span v-if="loading"><i class="fa-solid fa-spinner fa-spin"></i></span>
+        <span v-else>찾기</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 현재 검색어 표시 -->
+  <div v-if="activeQuery" style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+    <i class="fa-solid fa-circle-info me-1" style="color: var(--accent-color);"></i>
+    "<span style="color: var(--text-main); font-weight: 600;">{{ activeQuery }}</span>" 검색 결과
+    <span v-if="videos.length" style="margin-left: 0.5rem; color: var(--primary-color);">({{ videos.length }}개)</span>
+  </div>
+
+  <!-- 로딩 -->
+  <div v-if="loading" class="loading-area" id="loading-container">
+    <div class="spinner"></div>
+    <p style="color: var(--text-muted);">영상을 불러오는 중...</p>
+  </div>
+
+  <!-- 에러 -->
+  <div v-else-if="error" class="glass-card" style="padding: 1.5rem; margin-bottom: 1.5rem; border-left: 3px solid #ff5252;" id="error-container">
+    <i class="fa-solid fa-circle-exclamation" style="color: #ff5252; margin-right: 0.5rem;"></i>
+    <span style="color: var(--text-main);">{{ error }}</span>
+  </div>
+
+  <!-- 영상 그리드 -->
+  <div v-else-if="videos.length" class="videos-grid" id="videos-grid">
+    <div
+      v-for="video in videos"
+      :key="video.id.videoId"
+      class="glass-card video-card"
+      @click="goToDetail(video.id.videoId)"
+    >
+      <div class="video-thumb-wrap">
+        <img :src="video.snippet.thumbnails.medium.url" :alt="video.snippet.title" loading="lazy" />
+        <div class="video-play-overlay">
+          <i class="fa-solid fa-circle-play"></i>
+        </div>
+      </div>
+      <div class="video-card-body">
+        <p class="video-card-title">{{ video.snippet.title }}</p>
+        <p class="video-card-channel">
+          <i class="fa-solid fa-user" style="font-size: 0.75rem; margin-right: 0.3rem; opacity: 0.6;"></i>
+          {{ video.snippet.channelTitle }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 빈 상태 -->
+  <div v-else-if="!loading && activeQuery" class="empty-state" id="empty-state">
+    <div class="empty-state-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+    <p>검색 결과가 없습니다.</p>
+  </div>
+
+  {% endverbatim %}
+</div>
+
+<!-- 하단 바로가기 -->
+<div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap;" id="bottom-links">
+  <a href="{% url 'travel:saved_videos' %}" class="btn btn-outline" style="display: inline-flex; align-items: center; gap: 0.5rem;" id="link-saved">
+    <i class="fa-regular fa-clock"></i> 나중에 볼 영상
+  </a>
+  <a href="{% url 'travel:saved_channels' %}" class="btn btn-outline" style="display: inline-flex; align-items: center; gap: 0.5rem;" id="link-channels">
+    <i class="fa-solid fa-tv"></i> 저장된 채널
+  </a>
+</div>
+
+<!-- Vue.js 3 CDN -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<!-- Axios CDN -->
+<script src="https://cdn.jsdelivr.net/npm/axios@1.7.2/dist/axios.min.js"></script>
+
+<script>
+const { createApp, ref, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const queries = ref(INITIAL_QUERIES);
+    const activeQuery = ref('');
+    const customQuery = ref('');
+    const videos = ref([]);
+    const loading = ref(false);
+    const error = ref('');
+
+    async function searchByQuery(query) {
+      activeQuery.value = query;
+      loading.value = true;
+      error.value = '';
+      videos.value = [];
+      try {
+        const res = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+          params: {
+            key: YOUTUBE_API_KEY,
+            q: query,
+            part: 'snippet',
+            type: 'video',
+            maxResults: 12,
+            relevanceLanguage: 'ko',
+          },
+        });
+        videos.value = res.data.items;
+      } catch (e) {
+        error.value = 'YouTube API 호출 중 오류가 발생했습니다. API 키를 확인해 주세요.';
+        console.error(e);
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    function searchCustom() {
+      const q = customQuery.value.trim();
+      if (q) {
+        searchByQuery(q);
+        customQuery.value = '';
+      }
+    }
+
+    function goToDetail(videoId) {
+      window.location.href = '/travel/videos/detail/' + videoId + '/';
+    }
+
+    onMounted(() => {
+      if (queries.value.length > 0) {
+        searchByQuery(queries.value[0]);
+      }
+    });
+
+    return { queries, activeQuery, customQuery, videos, loading, error, searchByQuery, searchCustom, goToDetail };
+  },
+}).mount('#video-app');
+</script>
+{% endblock %}

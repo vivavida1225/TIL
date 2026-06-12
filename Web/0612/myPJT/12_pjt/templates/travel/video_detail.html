@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% block title %}영상 상세 - 야무짐{% endblock %}
+
+{% block extra_css %}
+<style>
+  .detail-skeleton { color: var(--text-muted); text-align: center; padding: 3rem 0; }
+  .spinner {
+    width: 48px; height: 48px; border-radius: 50%;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1.5rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .video-wrapper {
+    position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;
+    border-radius: 16px; margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+  }
+  .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+  .channel-info {
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;
+  }
+  .channel-avatar-text {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--primary-color); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
+  }
+  .channel-name-text { font-size: 1rem; font-weight: 600; color: var(--text-main); }
+  .channel-id-text { font-size: 0.78rem; color: var(--text-muted); }
+
+  .description-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    white-space: pre-wrap;
+    line-height: 1.7;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
+  }
+  .description-box::-webkit-scrollbar { width: 6px; }
+  .description-box::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+
+  .action-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+  .btn-save-video {
+    padding: 0.65rem 1.5rem; border-radius: 50px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;
+    border: 1px solid var(--border-color); transition: var(--transition);
+  }
+  .btn-save-video.saved {
+    background: rgba(255,255,255,0.07); color: var(--text-muted);
+  }
+  .btn-save-video.saved:hover {
+    background: rgba(255,82,82,0.1); border-color: rgba(255,82,82,0.4); color: #ff5252;
+  }
+  .btn-save-video.unsaved {
+    background: linear-gradient(135deg, var(--primary-color), #4a148c);
+    color: #fff; border-color: transparent; box-shadow: 0 4px 15px rgba(124,77,255,0.3);
+  }
+  .btn-save-video.unsaved:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124,77,255,0.45); }
+
+  .btn-save-channel {
+    padding: 0.65rem 1.5rem; border-radius: 50px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;
+    border: 1px solid transparent; transition: var(--transition);
+  }
+  .btn-save-channel.saved {
+    background: rgba(0,229,255,0.1); border-color: rgba(0,229,255,0.3); color: var(--accent-color);
+  }
+  .btn-save-channel.unsaved {
+    background: rgba(255,255,255,0.05); border-color: var(--border-color); color: var(--text-muted);
+  }
+  .btn-save-channel.unsaved:hover {
+    background: rgba(0,229,255,0.08); border-color: rgba(0,229,255,0.25); color: var(--accent-color);
+  }
+
+  .toast-fixed {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    background: rgba(20,26,42,0.95); backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color); border-radius: 50px;
+    padding: 0.75rem 1.5rem; color: var(--text-main);
+    display: flex; align-items: center; gap: 0.75rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    z-index: 1000; min-width: 260px; justify-content: center;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateX(-50%) translateY(20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<script>
+  const YOUTUBE_API_KEY = '{{ youtube_api_key }}';
+  const VIDEO_ID = '{{ video_id }}';
+</script>
+
+<a href="javascript:history.back();" class="back-btn" style="display: inline-flex; align-items: center; gap: 0.4rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 1.5rem; transition: var(--transition);" id="back-btn">
+  <i class="fa-solid fa-arrow-left"></i> 뒤로가기
+</a>
+
+<div id="detail-app">
+  {% verbatim %}
+
+  <!-- 로딩 -->
+  <div v-if="loading" class="detail-skeleton" id="loading-area">
+    <div class="spinner"></div>
+    <p>영상 정보를 불러오는 중...</p>
+  </div>
+
+  <!-- 에러 -->
+  <div v-else-if="error" class="glass-card" style="padding: 1.5rem; border-left: 3px solid #ff5252;" id="error-area">
+    <i class="fa-solid fa-circle-exclamation" style="color: #ff5252; margin-right: 0.5rem;"></i>
+    {{ error }}
+  </div>
+
+  <!-- 본문 -->
+  <div v-else-if="video" id="content-area">
+    <!-- 제목 -->
+    <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.4rem; line-height: 1.4;">
+      {{ video.snippet.title }}
+    </h2>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+      <i class="fa-regular fa-calendar" style="margin-right: 0.3rem;"></i>
+      업로드: {{ formatDate(video.snippet.publishedAt) }}
+    </p>
+
+    <!-- iframe 플레이어 -->
+    <div class="video-wrapper" id="player-wrapper">
+      <iframe
+        :src="'https://www.youtube.com/embed/' + videoId"
+        allowfullscreen
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      ></iframe>
+    </div>
+
+    <!-- 채널 정보 -->
+    <div class="channel-info" id="channel-area">
+      <div class="channel-avatar-text">{{ video.snippet.channelTitle.charAt(0).toUpperCase() }}</div>
+      <div>
+        <p class="channel-name-text">{{ video.snippet.channelTitle }}</p>
+        <p class="channel-id-text">{{ video.snippet.channelId }}</p>
+      </div>
+    </div>
+
+    <!-- 설명 -->
+    <div class="description-box" id="description-box">{{ video.snippet.description || '설명이 없습니다.' }}</div>
+
+    <!-- 저장 버튼들 -->
+    <div class="action-btns" id="action-buttons">
+      <button @click="toggleSaveVideo" :class="['btn-save-video', isSaved ? 'saved' : 'unsaved']">
+        <i :class="['fa-solid', isSaved ? 'fa-bookmark' : 'fa-bookmark']"></i>
+        {{ isSaved ? '저장 취소' : '동영상 저장' }}
+      </button>
+      <button @click="toggleSaveChannel" :class="['btn-save-channel', isChannelSaved ? 'saved' : 'unsaved']">
+        <i class="fa-solid fa-tv"></i>
+        {{ isChannelSaved ? '채널 저장됨' : '채널 저장' }}
+      </button>
+      <a href="/travel/videos/saved/" class="btn btn-outline" style="display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 50px; padding: 0.65rem 1.2rem; font-size: 0.9rem;">
+        <i class="fa-regular fa-clock"></i> 나중에 볼 영상
+      </a>
+    </div>
+  </div>
+
+  <!-- 토스트 알림 -->
+  <div v-if="toast" class="toast-fixed" id="toast-msg">
+    <i :class="['fa-solid', toastType === 'save' ? 'fa-circle-check' : 'fa-circle-minus']"
+       :style="{ color: toastType === 'save' ? 'var(--accent-color)' : 'var(--text-muted)' }"></i>
+    {{ toast }}
+  </div>
+
+  {% endverbatim %}
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@1.7.2/dist/axios.min.js"></script>
+<script>
+const { createApp, ref, computed, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const videoId = ref(VIDEO_ID);
+    const video = ref(null);
+    const loading = ref(false);
+    const error = ref('');
+    const toast = ref('');
+    const toastType = ref('save');
+    let toastTimer = null;
+
+    const savedVideos = ref(JSON.parse(localStorage.getItem('mytube_saved_videos') || '[]'));
+    const savedChannels = ref(JSON.parse(localStorage.getItem('mytube_saved_channels') || '[]'));
+
+    const isSaved = computed(() => savedVideos.value.some(v => v.id === VIDEO_ID));
+    const isChannelSaved = computed(() =>
+      video.value ? savedChannels.value.some(c => c.id === video.value.snippet.channelId) : false
+    );
+
+    async function fetchVideo() {
+      loading.value = true;
+      error.value = '';
+      try {
+        const res = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
+          params: { key: YOUTUBE_API_KEY, id: VIDEO_ID, part: 'snippet' },
+        });
+        if (!res.data.items.length) {
+          error.value = '영상 정보를 찾을 수 없습니다.';
+        } else {
+          video.value = res.data.items[0];
+        }
+      } catch (e) {
+        error.value = '영상 정보를 불러오는 중 오류가 발생했습니다.';
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    function showToast(msg, type) {
+      toast.value = msg;
+      toastType.value = type;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.value = ''; }, 3000);
+    }
+
+    function toggleSaveVideo() {
+      const idx = savedVideos.value.findIndex(v => v.id === VIDEO_ID);
+      if (idx === -1) {
+        savedVideos.value.push({
+          id: VIDEO_ID,
+          title: video.value.snippet.title,
+          thumbnail: video.value.snippet.thumbnails.medium?.url || video.value.snippet.thumbnails.default?.url,
+        });
+        showToast('나중에 볼 영상에 저장되었습니다.', 'save');
+      } else {
+        savedVideos.value.splice(idx, 1);
+        showToast('저장이 취소되었습니다.', 'remove');
+      }
+      localStorage.setItem('mytube_saved_videos', JSON.stringify(savedVideos.value));
+    }
+
+    function toggleSaveChannel() {
+      if (!video.value) return;
+      const id = video.value.snippet.channelId;
+      const title = video.value.snippet.channelTitle;
+      const idx = savedChannels.value.findIndex(c => c.id === id);
+      if (idx === -1) {
+        savedChannels.value.push({ id, title });
+        showToast(title + ' 채널이 저장되었습니다.', 'save');
+      } else {
+        savedChannels.value.splice(idx, 1);
+        showToast('채널 저장이 취소되었습니다.', 'remove');
+      }
+      localStorage.setItem('mytube_saved_channels', JSON.stringify(savedChannels.value));
+    }
+
+    function formatDate(dateStr) {
+      return new Date(dateStr).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    onMounted(fetchVideo);
+
+    return { videoId, video, loading, error, toast, toastType, isSaved, isChannelSaved, toggleSaveVideo, toggleSaveChannel, formatDate };
+  },
+}).mount('#detail-app');
+</script>
+{% endblock %}

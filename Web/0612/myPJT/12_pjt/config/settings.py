@@ -144,4 +144,7 @@ KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
 KAKAO_LOGIN_CLIENT_SECRET = os.getenv('KAKAO_LOGIN_CLIENT_SECRET')
 KAKAO_REDIRECT_URI = 'http://127.0.0.1:8000/accounts/kakao/callback/'
 
+# YouTube API Configuration
+YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY', '')
+
 

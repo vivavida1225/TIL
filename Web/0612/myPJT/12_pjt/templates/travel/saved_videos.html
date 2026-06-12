@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}나중에 볼 영상 - 야무짐{% endblock %}
+
+{% block extra_css %}
+<style>
+  .saved-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+  .saved-card { padding: 0 !important; overflow: hidden; cursor: pointer; transition: var(--transition); }
+  .saved-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.18); box-shadow: 0 10px 35px rgba(0,0,0,0.5); }
+  .saved-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+  .saved-card-body { padding: 0.85rem 1rem 0.75rem; }
+  .saved-card-title {
+    font-size: 0.87rem; font-weight: 600; color: var(--text-main);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    margin-bottom: 0.6rem; line-height: 1.4;
+  }
+  .btn-delete-saved {
+    width: 100%; padding: 0.4rem; border-radius: 8px; border: 1px solid rgba(255,82,82,0.2);
+    background: rgba(255,82,82,0.05); color: rgba(255,82,82,0.7);
+    font-size: 0.8rem; cursor: pointer; transition: var(--transition);
+  }
+  .btn-delete-saved:hover { background: rgba(255,82,82,0.15); border-color: rgba(255,82,82,0.5); color: #ff5252; }
+  .empty-state { text-align: center; padding: 5rem 0; color: var(--text-muted); }
+  .empty-icon { font-size: 3.5rem; margin-bottom: 1.25rem; opacity: 0.3; }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'home' %}" class="back-btn" style="display: inline-flex; align-items: center; gap: 0.4rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 1.5rem; transition: var(--transition);" id="back-link">
+  <i class="fa-solid fa-arrow-left"></i> 뒤로가기
+</a>
+
+<h2 style="font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #fff 40%, var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem;" id="page-title">
+  나중에 볼 동영상
+</h2>
+
+<div id="saved-app">
+  {% verbatim %}
+
+  <!-- 빈 상태 -->
+  <div v-if="savedVideos.length === 0" class="empty-state" id="empty-container">
+    <div class="empty-icon"><i class="fa-regular fa-clock"></i></div>
+    <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.5rem;">등록된 비디오 없음</p>
+    <p style="font-size: 0.9rem;">영상 상세 페이지에서 "동영상 저장" 버튼을 눌러보세요.</p>
+    <a href="/" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; padding: 0.65rem 1.5rem; border-radius: 50px; background: linear-gradient(135deg, var(--primary-color), #4a148c); color: #fff; text-decoration: none; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(124,77,255,0.3);">
+      <i class="fa-solid fa-house"></i> 홈으로 가서 여행 영상 보기
+    </a>
+  </div>
+
+  <!-- 그리드 -->
+  <div v-else class="saved-grid" id="saved-grid">
+    <div
+      v-for="video in savedVideos"
+      :key="video.id"
+      class="glass-card saved-card"
+      id="'saved-card-' + video.id"
+    >
+      <img :src="video.thumbnail" :alt="video.title" class="saved-thumb" @click="goToVideo(video.id)" />
+      <div class="saved-card-body">
+        <p class="saved-card-title" @click="goToVideo(video.id)">{{ video.title }}</p>
+        <button @click="removeVideo(video.id)" class="btn-delete-saved">
+          <i class="fa-solid fa-trash me-1"></i> 삭제
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {% endverbatim %}
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script>
+const { createApp, ref } = Vue;
+createApp({
+  setup() {
+    const savedVideos = ref(JSON.parse(localStorage.getItem('mytube_saved_videos') || '[]'));
+
+    function removeVideo(id) {
+      savedVideos.value = savedVideos.value.filter(v => v.id !== id);
+      localStorage.setItem('mytube_saved_videos', JSON.stringify(savedVideos.value));
+    }
+
+    function goToVideo(id) {
+      window.location.href = '/travel/videos/detail/' + id + '/';
+    }
+
+    return { savedVideos, removeVideo, goToVideo };
+  },
+}).mount('#saved-app');
+</script>
+{% endblock %}

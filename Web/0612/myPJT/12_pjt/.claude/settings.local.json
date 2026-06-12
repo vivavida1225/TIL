@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(ls /Users/kimgeunyoung/Downloads/10-pjt/ && echo \"---\" && ls /Users/kimgeunyoung/Downloads/ | head -20)",
+      "Read(//Users/kimgeunyoung/Downloads/**)",
+      "Bash(mkdir -p /Users/kimgeunyoung/Downloads/10-pjt/mytube/src/views /Users/kimgeunyoung/Downloads/10-pjt/mytube/src/components /Users/kimgeunyoung/Downloads/10-pjt/mytube/src/router /Users/kimgeunyoung/Downloads/10-pjt/mytube/src/assets)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(python manage.py check)"
+    ],
+    "additionalDirectories": [
+      "/Users/kimgeunyoung/Downloads/10-pjt/mytube/src"
+    ]
+  }
+}

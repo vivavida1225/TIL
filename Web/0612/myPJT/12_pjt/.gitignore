@@ -1,3 +1,15 @@
+# ===== Vue.js / Node.js (mytube) =====
+mytube/node_modules/
+mytube/dist/
+mytube/.env
+mytube/.env.local
+mytube/.env.*.local
+
+# ===== API Keys / Secrets =====
+.env
+.env.local
+*.env
+
 # Created by https://www.toptal.com/developers/gitignore/api/python,django
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,django
 
