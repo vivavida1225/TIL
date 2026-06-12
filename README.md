@@ -29,10 +29,10 @@
 ---
 
 ## 📊 최근에 깊게 고민한 주제들 (Featured)
-*최근에 작성한 글 중 면접이나 포트폴리오에 활용할 만한 좋은 글을 링크해 두면 좋습니다.*
+*최근에 작성한 README.md 중 기억할 만한 주제들.*
 
 - [Vue.js에서 컴포넌트 간 데이터 흐름 제어하기 (Props & Emit)](./Web/0608/vue_hw_7_4/readme.md)
-
+- [Vue.js에서 한글 반응성을 위한 v-on:input 활용법](./Web/0610/vue_hw_3_4/readme.md)
 ---
 
 ## 🛠️ Tech Stack
