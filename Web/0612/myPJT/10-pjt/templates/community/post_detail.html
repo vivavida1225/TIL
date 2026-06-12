@@ -1,0 +1,707 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }} - 야무짐{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        padding-top: 1rem;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .back-btn:hover {
+        color: var(--accent-color);
+        transform: translateX(-4px);
+    }
+
+    .detail-card {
+        padding: 3rem;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+    }
+
+    /* Author info header */
+    .author-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 1.5rem;
+    }
+
+    .author-info {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .author-info:hover .author-name {
+        color: var(--accent-color);
+    }
+
+    .author-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 2px solid var(--accent-color);
+        object-fit: cover;
+        box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+    }
+
+    .author-avatar-placeholder {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-color);
+        font-weight: 700;
+        color: white;
+        font-size: 1.25rem;
+    }
+
+    .author-name-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .author-name {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: white;
+        transition: all 0.2s ease;
+    }
+
+    .post-date {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    /* Post Content Core */
+    .post-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .post-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: white;
+        line-height: 1.35;
+        background: linear-gradient(to right, #ffffff, #c7d2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .post-text {
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: #e2e8f0;
+        white-space: pre-line;
+        background: rgba(255, 255, 255, 0.01);
+        border: 1px solid rgba(255, 255, 255, 0.02);
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    /* Shared Travel Box inside Detail */
+    .travel-detail-box {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .travel-box-title {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        padding-bottom: 0.4rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .travel-box-date {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .travel-box-date i {
+        color: var(--accent-color);
+        font-size: 0.95rem;
+    }
+
+    .travel-badge-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+    }
+
+    .badge-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        min-width: 40px;
+    }
+
+    .travel-badge-country {
+        background: rgba(0, 229, 255, 0.08);
+        color: var(--accent-color);
+        border: 1px solid rgba(0, 229, 255, 0.25);
+        padding: 0.25rem 0.65rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .travel-badge-city {
+        background: rgba(124, 77, 255, 0.12);
+        color: #c7d2fe;
+        border: 1px solid rgba(124, 77, 255, 0.3);
+        padding: 0.25rem 0.65rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    /* Social Reaction Actions Row */
+    .reactions-bar {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 1.5rem;
+    }
+
+    .btn-react {
+        padding: 0.65rem 1.4rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+    }
+
+    /* Like Toggled State styles */
+    .btn-react.like-btn {
+        background: rgba(255, 82, 82, 0.05);
+        border: 1px solid rgba(255, 82, 82, 0.2);
+        color: rgba(255, 82, 82, 0.8);
+    }
+    
+    .btn-react.like-btn:hover {
+        background: rgba(255, 82, 82, 0.12);
+        border-color: rgba(255, 82, 82, 0.4);
+        color: #ff5252;
+        transform: translateY(-2px);
+    }
+
+    .btn-react.like-btn.active {
+        background: rgba(255, 82, 82, 0.15);
+        border-color: #ff5252;
+        color: #ff5252;
+        box-shadow: 0 0 15px rgba(255, 82, 82, 0.3);
+    }
+
+    /* Scrap Toggled State styles */
+    .btn-react.scrap-btn {
+        background: rgba(254, 229, 0, 0.05);
+        border: 1px solid rgba(254, 229, 0, 0.2);
+        color: rgba(254, 229, 0, 0.8);
+    }
+
+    .btn-react.scrap-btn:hover {
+        background: rgba(254, 229, 0, 0.12);
+        border-color: rgba(254, 229, 0, 0.4);
+        color: var(--kakao-yellow);
+        transform: translateY(-2px);
+    }
+
+    .btn-react.scrap-btn.active {
+        background: rgba(254, 229, 0, 0.15);
+        border-color: var(--kakao-yellow);
+        color: var(--kakao-yellow);
+        box-shadow: 0 0 15px rgba(254, 229, 0, 0.3);
+    }
+
+
+    /* --- COMMENTS COMPONENT SECTION --- */
+    .comments-section {
+        margin-top: 2.5rem;
+        background: rgba(20, 16, 38, 0.4);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2.5rem;
+        backdrop-filter: blur(15px);
+    }
+
+    .comments-title {
+        font-size: 1.3rem;
+        font-weight: 800;
+        margin-bottom: 1.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: white;
+    }
+
+    .comments-title i {
+        color: var(--accent-color);
+    }
+
+    .comment-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+    }
+
+    .comment-card {
+        padding: 1.2rem;
+        background: rgba(255, 255, 255, 0.015);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        transition: all 0.4s ease;
+    }
+
+    .comment-author-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .comment-author-info {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .comment-author-info:hover .comment-author-name {
+        color: var(--accent-color);
+    }
+
+    .comment-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1.5px solid var(--accent-color);
+        object-fit: cover;
+    }
+
+    .comment-avatar-placeholder {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        font-weight: 700;
+        color: white;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .comment-author-name {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: white;
+        transition: all 0.2s ease;
+    }
+
+    .comment-date {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .comment-delete-btn {
+        background: transparent;
+        border: none;
+        color: rgba(255, 82, 82, 0.5);
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
+
+    .comment-delete-btn:hover {
+        color: #ff5252;
+        transform: scale(1.1);
+    }
+
+    .comment-content {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #cbd5e1;
+        padding-left: 2.5rem;
+        white-space: pre-wrap;
+    }
+
+    /* Comment Write Form */
+    .comment-write-box {
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 1.8rem;
+    }
+
+    .comment-textarea {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1rem 1.2rem;
+        color: var(--text-main);
+        font-family: inherit;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        min-height: 80px;
+        outline: none;
+        resize: vertical;
+        box-sizing: border-box;
+        transition: all 0.3s ease;
+    }
+
+    .comment-textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 15px rgba(124, 77, 255, 0.25);
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .comment-submit-btn {
+        background: linear-gradient(135deg, var(--primary-color), #4a148c);
+        color: white;
+        font-weight: 700;
+        font-size: 0.9rem;
+        border: none;
+        padding: 0.75rem 1.6rem;
+        border-radius: 12px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s ease;
+        margin-top: 0.75rem;
+        float: right;
+    }
+
+    .comment-submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(124, 77, 255, 0.45);
+    }
+
+    .comment-write-box::after {
+        content: '';
+        display: table;
+        clear: both;
+    }
+
+    /* Spring Entrance Animation */
+    .detail-card {
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+    }
+
+    .detail-card.slide-init {
+        transform: translateX(100vw) scale(0.95);
+        opacity: 0;
+    }
+
+    .detail-card.slide-active {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-wrapper" id="post-detail-wrapper">
+    
+    <!-- Back to board button -->
+    <a href="{% url 'community:post_list' %}" class="back-btn" id="btn-back-board">
+        <i class="fa-solid fa-arrow-left"></i> 공유광장 목록으로 돌아가기
+    </a>
+
+    <!-- Main Detail Card -->
+    <div class="glass-card detail-card slide-init" id="post-detail-card">
+        
+        <!-- Author Header -->
+        <div class="author-section" id="post-author-section">
+            <a href="{% url 'accounts:user_profile' user_id=post.user.id %}" class="author-info" id="author-profile-link">
+                {% if post.user.profile_image_url %}
+                    <img src="{{ post.user.profile_image_url }}" alt="Profile" class="author-avatar">
+                {% else %}
+                    <div class="author-avatar-placeholder">
+                        {{ post.user.nickname|default:post.user.first_name|slice:":1"|upper }}
+                    </div>
+                {% endif %}
+                <div class="author-name-group">
+                    <span class="author-name">{{ post.user.nickname|default:post.user.first_name }}</span>
+                    <span class="post-date">{{ post.created_at|date:"Y년 m월 d일 H:i" }}</span>
+                </div>
+            </a>
+            
+            {% if user.is_authenticated and user != post.user %}
+                <!-- Follow Quick tag in detail if not followed -->
+                <a href="{% url 'accounts:user_profile' user_id=post.user.id %}" 
+                   class="btn btn-outline" style="font-size: 0.8rem; padding: 0.4rem 0.9rem;" id="badge-visit-profile">
+                    프로필 보기
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Post Content Main -->
+        <div class="post-body" id="post-body-container">
+            <h1 class="post-title" id="post-title">{{ post.title }}</h1>
+            
+            <!-- Shared Itinerary detail visualizer -->
+            <div class="travel-detail-box" id="travel-shared-visualizer">
+                <div class="travel-box-title">공유된 여행 일정 정보</div>
+                <div class="travel-box-date">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>{{ post.travel.start_date|date:"n월 j일" }} ~ {{ post.travel.end_date|date:"n월 j일" }} ({{ post.travel.start_date|date:"n월 j일" }}부터 {{ post.travel.end_date|date:"n월 j일" }}까지)</span>
+                </div>
+                <div class="travel-badge-group">
+                    <div class="travel-badge-row">
+                        <span class="badge-label">국가</span>
+                        {% for country in post.travel.countries.all %}
+                            <span class="travel-badge-country">{{ country.name }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="travel-badge-row">
+                        <span class="badge-label">도시</span>
+                        {% for city in post.travel.cities.all %}
+                            <span class="travel-badge-city">{{ city.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content body text -->
+            <div class="post-text" id="post-content-body">
+                {{ post.content }}
+            </div>
+        </div>
+
+        <!-- Social Action Buttons -->
+        <div class="reactions-bar" id="post-reactions-bar">
+            {% if user.is_authenticated %}
+                <!-- Like Button Toggle -->
+                <a href="{% url 'community:post_like' post_id=post.id %}" 
+                   class="btn-react like-btn no-transition {% if is_liked %}active{% endif %}" id="btn-like-toggle">
+                    <i class="fa-{% if is_liked %}solid{% else %}regular{% endif %} fa-heart"></i>
+                    <span>좋아요 {{ post.likes.count }}</span>
+                </a>
+
+                <!-- Scrap Button Toggle -->
+                <a href="{% url 'community:post_scrap' post_id=post.id %}" 
+                   class="btn-react scrap-btn no-transition {% if is_scraped %}active{% endif %}" id="btn-scrap-toggle">
+                    <i class="fa-{% if is_scraped %}solid{% else %}regular{% endif %} fa-star"></i>
+                    <span>스크랩 {{ post.scraps.count }}</span>
+                </a>
+            {% else %}
+                <div class="btn-react like-btn" onclick="alert('로그인 후 좋아요를 보낼 수 있습니다.');" style="cursor: pointer;">
+                    <i class="fa-regular fa-heart"></i>
+                    <span>좋아요 {{ post.likes.count }}</span>
+                </div>
+                <div class="btn-react scrap-btn" onclick="alert('로그인 후 보관함에 스크랩할 수 있습니다.');" style="cursor: pointer;">
+                    <i class="fa-regular fa-star"></i>
+                    <span>스크랩 {{ post.scraps.count }}</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- --- COMMENTS COMPONENT BOX --- -->
+    <div class="comments-section" id="post-comments-section">
+        <h3 class="comments-title" id="comments-count-title">
+            <i class="fa-solid fa-comments"></i> 소통 댓글 ({{ comments.count }})
+        </h3>
+
+        <!-- Comment List -->
+        <div class="comment-list" id="comment-list-container">
+            {% for comment in comments %}
+                <div class="comment-card" id="comment-card-{{ comment.id }}">
+                    <div class="comment-author-row">
+                        <a href="{% url 'accounts:user_profile' user_id=comment.user.id %}" class="comment-author-info">
+                            {% if comment.user.profile_image_url %}
+                                <img src="{{ comment.user.profile_image_url }}" alt="Profile" class="comment-avatar">
+                            {% else %}
+                                <div class="comment-avatar-placeholder">
+                                    {{ comment.user.nickname|default:comment.user.first_name|slice:":1"|upper }}
+                                </div>
+                            {% endif %}
+                            <div class="comment-author-name-group">
+                                <span class="comment-author-name">{{ comment.user.nickname|default:comment.user.first_name }}</span>
+                                <span class="comment-date">{{ comment.created_at|date:"Y.m.d H:i" }}</span>
+                            </div>
+                        </a>
+                        
+                        {% if comment.user == user %}
+                            <!-- Delete button (only author) -->
+                            <button type="button" class="comment-delete-btn" title="댓글 삭제"
+                                    onclick="confirmDeleteComment('{{ comment.id }}', '{% url 'community:comment_delete' post.id comment.id %}');">
+                                <i class="fa-solid fa-trash-can"></i> 삭제
+                            </button>
+                        {% endif %}
+                    </div>
+                    <p class="comment-content">{{ comment.content }}</p>
+                </div>
+            {% empty %}
+                <div style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 2rem 0;" id="comment-empty-message">
+                    등록된 댓글이 없습니다. 첫 댓글을 남겨 의견을 공유하세요!
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Comment Write Form -->
+        <div class="comment-write-box" id="comment-write-box">
+            {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'community:comment_create' post_id=post.id %}" id="comment-submit-form">
+                    {% csrf_token %}
+                    <textarea name="content" required class="comment-textarea" 
+                              placeholder="건전하고 유쾌한 소통을 위해 따뜻한 댓글을 남겨주세요..." rows="3"></textarea>
+                    <button type="submit" class="comment-submit-btn" id="btn-submit-comment">
+                        댓글 달기 <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            {% else %}
+                <div style="color: var(--text-muted); font-size: 0.95rem; text-align: center; padding: 1rem 0;">
+                    소통 댓글을 등록하려면 <a href="{% url 'accounts:login' %}" style="color: var(--accent-color); font-weight:700; text-decoration:none;">로그인</a>이 필요합니다.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const card = document.getElementById("post-detail-card");
+        
+        // Trigger entrance slide
+        if (card) {
+            card.offsetHeight; // force reflow
+            card.classList.add("slide-active");
+        }
+
+        // --- ASYNCHRONOUS REACTION TOGGLERS (AJAX FETCH) ---
+        const likeBtn = document.getElementById("btn-like-toggle");
+        const scrapBtn = document.getElementById("btn-scrap-toggle");
+
+        if (likeBtn) {
+            likeBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                
+                // Add click scale micro-animation
+                likeBtn.style.transform = "scale(0.92)";
+                setTimeout(() => { likeBtn.style.transform = ""; }, 100);
+
+                fetch(likeBtn.getAttribute("href"), {
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.liked) {
+                        likeBtn.classList.add("active");
+                        likeBtn.innerHTML = `<i class="fa-solid fa-heart"></i> <span>좋아요 ${data.likes_count}</span>`;
+                        // Neon spring pulse effect
+                        likeBtn.style.boxShadow = "0 0 25px rgba(255, 82, 82, 0.6)";
+                        setTimeout(() => { likeBtn.style.boxShadow = ""; }, 300);
+                    } else {
+                        likeBtn.classList.remove("active");
+                        likeBtn.innerHTML = `<i class="fa-regular fa-heart"></i> <span>좋아요 ${data.likes_count}</span>`;
+                    }
+                })
+                .catch(err => console.error("Error toggling like:", err));
+            });
+        }
+
+        if (scrapBtn) {
+            scrapBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                
+                // Add click scale micro-animation
+                scrapBtn.style.transform = "scale(0.92)";
+                setTimeout(() => { scrapBtn.style.transform = ""; }, 100);
+
+                fetch(scrapBtn.getAttribute("href"), {
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.scraped) {
+                        scrapBtn.classList.add("active");
+                        scrapBtn.innerHTML = `<i class="fa-solid fa-star"></i> <span>스크랩 ${data.scraps_count}</span>`;
+                        // Neon spring pulse effect
+                        scrapBtn.style.boxShadow = "0 0 25px rgba(254, 229, 0, 0.6)";
+                        setTimeout(() => { scrapBtn.style.boxShadow = ""; }, 300);
+                    } else {
+                        scrapBtn.classList.remove("active");
+                        scrapBtn.innerHTML = `<i class="fa-regular fa-star"></i> <span>스크랩 ${data.scraps_count}</span>`;
+                    }
+                })
+                .catch(err => console.error("Error toggling scrap:", err));
+            });
+        }
+    });
+
+    function confirmDeleteComment(commentId, deleteUrl) {
+        if (confirm("댓글을 정말 삭제하시겠습니까?")) {
+            const card = document.getElementById("comment-card-" + commentId);
+            if (card) {
+                card.style.transition = "all 0.4s ease";
+                card.style.opacity = "0";
+                card.style.transform = "translateY(-15px) scale(0.95)";
+                card.style.pointerEvents = "none";
+            }
+            
+            setTimeout(() => {
+                window.location.href = deleteUrl;
+            }, 400);
+        }
+    }
+</script>
+{% endblock %}

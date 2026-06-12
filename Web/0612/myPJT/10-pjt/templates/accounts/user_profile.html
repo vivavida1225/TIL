@@ -1,0 +1,477 @@
+{% extends 'base.html' %}
+{% block title %}{{ target_user.nickname|default:target_user.first_name }}님의 프로필 - 야무짐{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-wrapper {
+        max-width: 700px;
+        margin: 0 auto;
+        padding-top: 1rem;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .back-btn:hover {
+        color: var(--accent-color);
+        transform: translateX(-4px);
+    }
+
+    .profile-card {
+        padding: 3rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+    }
+
+    .profile-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(124, 77, 255, 0.08) 0%, transparent 60%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .profile-header {
+        position: relative;
+        z-index: 1;
+    }
+
+    .profile-avatar-large {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid var(--accent-color);
+        object-fit: cover;
+        box-shadow: 0 0 25px rgba(0, 229, 255, 0.4);
+        margin: 0 auto 1.5rem;
+        transition: transform 0.5s ease;
+    }
+
+    .profile-avatar-large:hover {
+        transform: rotate(5deg) scale(1.05);
+    }
+
+    .profile-nickname {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(to right, #ffffff, #c7d2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .profile-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(254, 229, 0, 0.12);
+        color: var(--kakao-yellow);
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid rgba(254, 229, 0, 0.2);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Social Stats Grid */
+    .social-stats-bar {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        margin-bottom: 2rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        padding: 1rem 2rem;
+        border-radius: 16px;
+        max-width: 400px;
+        margin: 0 auto 2rem;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat-num {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: white;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+        font-weight: 500;
+    }
+
+    /* Follow Action Buttons */
+    .btn-follow {
+        padding: 0.75rem 2.2rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+    }
+
+    /* Follow state style */
+    .btn-follow.active-follow {
+        background: rgba(0, 229, 255, 0.12);
+        color: var(--accent-color);
+        border: 2px solid var(--accent-color);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+    }
+
+    .btn-follow.active-follow:hover {
+        background: rgba(255, 82, 82, 0.15);
+        color: #ff5252;
+        border-color: #ff5252;
+        box-shadow: 0 0 20px rgba(255, 82, 82, 0.4);
+    }
+
+    .btn-follow.active-follow:hover span::after {
+        content: ' 취소';
+    }
+
+    /* Unfollow state style */
+    .btn-follow.inactive-follow {
+        background: linear-gradient(135deg, var(--primary-color), #4a148c);
+        color: white;
+        border: 2px solid transparent;
+        box-shadow: 0 4px 15px rgba(124, 77, 255, 0.3);
+    }
+
+    .btn-follow.inactive-follow:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(124, 77, 255, 0.5);
+    }
+
+    /* Details styling */
+    .profile-details-list {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-top: 2rem;
+        text-align: left;
+        position: relative;
+        z-index: 1;
+    }
+
+    .profile-detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .profile-detail-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .profile-detail-item:first-child {
+        padding-top: 0;
+    }
+
+    .detail-label {
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .detail-val {
+        font-weight: 600;
+        color: var(--text-main);
+        font-size: 0.95rem;
+    }
+
+    /* Travels Timeline inside profile */
+    .profile-travels-section {
+        margin-top: 3rem;
+    }
+
+    .profile-travels-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: white;
+    }
+
+    .profile-travels-title i {
+        color: var(--accent-color);
+    }
+
+    .travel-card-mini {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+
+    .travel-card-mini-date {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .travel-card-mini-date i {
+        color: var(--accent-color);
+        font-size: 0.9rem;
+    }
+
+    .travel-badge-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .travel-badge-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .badge-label {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        min-width: 40px;
+    }
+
+    .travel-badge-country {
+        background: rgba(0, 229, 255, 0.08);
+        color: var(--accent-color);
+        border: 1px solid rgba(0, 229, 255, 0.25);
+        padding: 0.2rem 0.6rem;
+        border-radius: 50px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .travel-badge-city {
+        background: rgba(124, 77, 255, 0.12);
+        color: #c7d2fe;
+        border: 1px solid rgba(124, 77, 255, 0.3);
+        padding: 0.2rem 0.6rem;
+        border-radius: 50px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    /* Spring entrance animation */
+    .profile-card {
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+    }
+
+    .profile-card.slide-init {
+        transform: translateX(100vw) scale(0.95);
+        opacity: 0;
+    }
+
+    .profile-card.slide-active {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper" id="user-profile-wrapper">
+    
+    <!-- Back Button -->
+    <a href="{% url 'community:post_list' %}" class="back-btn" id="btn-back-board">
+        <i class="fa-solid fa-arrow-left"></i> 커뮤니티 게시판으로 이동
+    </a>
+
+    <div class="glass-card profile-card slide-init" id="user-profile-card">
+        
+        <!-- Large Header -->
+        <div class="profile-header">
+            {% if target_user.profile_image_url %}
+            <img src="{{ target_user.profile_image_url }}" alt="Profile" class="profile-avatar-large" id="profile-avatar-large">
+            {% else %}
+            <div class="profile-avatar-large"
+                style="display: flex; align-items: center; justify-content: center; background: var(--primary-color); font-weight: 800; font-size: 3rem; color: white;"
+                id="profile-avatar-placeholder">
+                {{ target_user.nickname|default:target_user.first_name|default:target_user.username|slice:":1"|upper }}
+            </div>
+            {% endif %}
+            
+            <h2 class="profile-nickname" id="profile-nickname">{{ target_user.nickname|default:target_user.first_name }}</h2>
+            <div class="profile-badge" id="profile-kakao-badge">
+                <i class="fa-solid fa-comment"></i> Kakao 연동 회원
+            </div>
+        </div>
+
+        <!-- Follow Statistics Panels -->
+        <div class="social-stats-bar" id="social-stats-bar">
+            <div class="stat-item">
+                <span class="stat-num" id="stat-followers-num">{{ followers_count }}</span>
+                <span class="stat-label">팔로워</span>
+            </div>
+            <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.06); padding-left: 3rem;">
+                <span class="stat-num" id="stat-followings-num">{{ followings_count }}</span>
+                <span class="stat-label">팔로잉</span>
+            </div>
+        </div>
+
+        <!-- Follow/Following Button Actions -->
+        {% if user.is_authenticated and user != target_user %}
+            <div style="margin-bottom: 2rem;">
+                {% if is_following %}
+                    <a href="{% url 'accounts:follow_user' user_id=target_user.id %}" class="btn-follow active-follow" id="btn-follow-toggle">
+                        <i class="fa-solid fa-user-minus"></i>
+                        <span>팔로잉</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:follow_user' user_id=target_user.id %}" class="btn-follow inactive-follow" id="btn-follow-toggle">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>팔로우</span>
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Basic details list -->
+        <div class="profile-details-list" id="profile-details-container">
+            <div class="profile-detail-item">
+                <span class="detail-label">사용자 아이디</span>
+                <span class="detail-val">{{ target_user.username }}</span>
+            </div>
+            <div class="profile-detail-item">
+                <span class="detail-label">이메일 주소</span>
+                <span class="detail-val">{{ target_user.email|default:"이메일 제공 동의 안 함" }}</span>
+            </div>
+            <div class="profile-detail-item">
+                <span class="detail-label">성별</span>
+                <span class="detail-val">{{ target_user.gender|default:"미입력" }}</span>
+            </div>
+            <div class="profile-detail-item">
+                <span class="detail-label">생년월일</span>
+                <span class="detail-val">{{ target_user.birth_date|date:"Y년 m월 d일"|default:"미입력" }}</span>
+            </div>
+
+            <!-- Preference Details (if exist) -->
+            {% if preference %}
+            <div class="profile-detail-item">
+                <span class="detail-label">위생 민감도</span>
+                <span class="detail-val" style="color: var(--accent-color);">
+                    {% if preference.hygiene_sensitivity %}{{ preference.hygiene_sensitivity }} / 10{% else %}미입력{% endif %}
+                </span>
+            </div>
+            <div class="profile-detail-item">
+                <span class="detail-label">상황 대비성</span>
+                <span class="detail-val" style="color: var(--accent-color);">
+                    {% if preference.preparedness %}{{ preference.preparedness }} / 10{% else %}미입력{% endif %}
+                </span>
+            </div>
+            <div class="profile-detail-item" style="flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 0.9rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <span class="detail-label">선호 관광 스타일</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; width: 100%; margin-top: 0.25rem;">
+                    {% for choice in preference.choices.all %}
+                        {% if choice.category == 'STYLE' %}
+                            <span class="travel-badge-country">{{ choice.name }}</span>
+                        {% endif %}
+                    {% empty %}
+                        <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500;">선택된 관광 스타일이 없습니다.</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="profile-detail-item" style="flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 0.9rem 0; border-bottom: none;">
+                <span class="detail-label">선호 입맛 취향</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; width: 100%; margin-top: 0.25rem;">
+                    {% for choice in preference.choices.all %}
+                        {% if choice.category == 'TASTE' %}
+                            <span class="travel-badge-city">{{ choice.name }}</span>
+                        {% endif %}
+                    {% empty %}
+                        <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500;">선택된 입맛 취향이 없습니다.</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Travels timeline section inside profile -->
+        <div class="profile-travels-section" id="profile-travels-timeline">
+            <h3 class="profile-travels-title">
+                <i class="fa-solid fa-route"></i> {{ target_user.nickname|default:target_user.first_name }}님의 여행 계획 목록
+            </h3>
+            
+            {% if travels %}
+                {% for travel in travels %}
+                    <div class="glass-card travel-card-mini" id="profile-travel-{{ travel.id }}">
+                        <div class="travel-card-mini-date">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <span>{{ travel.start_date|date:"n월 j일" }} ~ {{ travel.end_date|date:"n월 j일" }} ({{ travel.start_date|date:"n월 j일" }}부터 {{ travel.end_date|date:"n월 j일" }}까지)</span>
+                        </div>
+                        <div class="travel-badge-group">
+                            <div class="travel-badge-row">
+                                <span class="badge-label">국가</span>
+                                {% for country in travel.countries.all %}
+                                    <span class="travel-badge-country">{{ country.name }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="travel-badge-row">
+                                <span class="badge-label">도시</span>
+                                {% for city in travel.cities.all %}
+                                    <span class="travel-badge-city">{{ city.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="color: var(--text-muted); font-size: 0.95rem; text-align: center; padding: 2rem 0;">
+                    등록된 여행 계획 일정이 없습니다.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const card = document.getElementById("user-profile-card");
+        
+        // Trigger slide entrance
+        if (card) {
+            card.offsetHeight; // force reflow
+            card.classList.add("slide-active");
+        }
+    });
+</script>
+{% endblock %}

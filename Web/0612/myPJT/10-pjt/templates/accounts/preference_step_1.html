@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+{% block title %}여행 취향 설문 (1/4) - 야무짐{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pref-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 550px;
+        margin: 0 auto;
+    }
+
+    .pref-card {
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Wizard Progress Bar */
+    .wizard-progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        position: relative;
+    }
+
+    .wizard-progress::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--border-color);
+        z-index: 0;
+        transform: translateY(-50%);
+    }
+
+    .progress-bar-fill {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 0%; /* Step 1 is 0% filled */
+        height: 2px;
+        background: var(--primary-color);
+        box-shadow: 0 0 10px var(--primary-color);
+        z-index: 1;
+        transform: translateY(-50%);
+        transition: width 0.5s ease;
+    }
+
+    .progress-step {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--bg-color);
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        z-index: 2;
+        transition: all 0.4s ease;
+    }
+
+    .progress-step.active {
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+        background: rgba(0, 229, 255, 0.1);
+    }
+
+    .progress-step.complete {
+        border-color: var(--primary-color);
+        color: white;
+        background: var(--primary-color);
+        box-shadow: 0 0 10px rgba(124, 77, 255, 0.3);
+    }
+
+    .pref-icon-container {
+        font-size: 2.8rem;
+        background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.75rem;
+        text-align: center;
+    }
+
+    .pref-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-align: center;
+        background: linear-gradient(to right, #ffffff, #c7d2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .pref-subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 2.5rem;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    /* Premium Range Slider Styling */
+    .slider-container {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        margin-bottom: 2.5rem;
+        text-align: center;
+    }
+
+    .slider-header {
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+
+    .range-slider-wrapper {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .range-slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 8px;
+        border-radius: 50px;
+        background: rgba(255, 255, 255, 0.08);
+        outline: none;
+        transition: background 0.3s;
+    }
+
+    /* Webkit (Chrome, Safari, Edge) Slider thumb */
+    .range-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--accent-color);
+        border: 2px solid white;
+        cursor: pointer;
+        box-shadow: 0 0 15px var(--accent-color);
+        transition: transform 0.1s, background-color 0.2s;
+    }
+
+    .range-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+    }
+
+    /* Firefox Slider thumb */
+    .range-slider::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--accent-color);
+        border: 2px solid white;
+        cursor: pointer;
+        box-shadow: 0 0 15px var(--accent-color);
+        transition: transform 0.1s, background-color 0.2s;
+    }
+
+    .range-slider::-moz-range-thumb:hover {
+        transform: scale(1.2);
+    }
+
+    /* Slider value display */
+    .slider-val-badge {
+        display: inline-block;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--accent-color);
+        text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+        margin-bottom: 0.5rem;
+    }
+
+    .slider-desc {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 1rem;
+    }
+
+    /* Action buttons grid */
+    .actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 1rem;
+    }
+
+    .btn-skip {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 0.94rem;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+    }
+
+    .btn-skip:hover {
+        background: rgba(255, 82, 82, 0.08);
+        border-color: rgba(255, 82, 82, 0.25);
+        color: #ff5252;
+    }
+
+    .btn-next {
+        background: linear-gradient(135deg, var(--primary-color), #4a148c);
+        color: white;
+        font-weight: 700;
+        border: none;
+        padding: 0.94rem;
+        border-radius: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(124, 77, 255, 0.3);
+    }
+
+    .btn-next:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(124, 77, 255, 0.5);
+    }
+
+    .btn-next:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(124, 77, 255, 0.25);
+    }
+
+    /* Horizontal Slide Card Transition */
+    .pref-card {
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+    }
+    
+    .pref-card.slide-init {
+        transform: translateX(100vw) scale(0.95);
+        opacity: 0;
+    }
+
+    .pref-card.slide-active {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+
+    .pref-card.slide-exit {
+        transform: translateX(-100vw) scale(0.95);
+        opacity: 0;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pref-wrapper" id="pref-container-wrapper">
+    <div class="glass-card pref-card slide-init" id="pref-card-main">
+        
+        <!-- Progress steps indicator -->
+        <div class="wizard-progress" id="progress-wizard">
+            <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
+            <div class="progress-step active">1</div>
+            <div class="progress-step">2</div>
+            <div class="progress-step">3</div>
+            <div class="progress-step">4</div>
+        </div>
+
+        <div class="pref-icon-container" id="pref-brand-icon">
+            <i class="fa-solid fa-shower"></i>
+        </div>
+        <h2 class="pref-title" id="heading-pref">1. 위생 민감도 설정</h2>
+        <p class="pref-subtitle" id="subheading-pref">
+            여행지 숙소나 샤워 필터, 세면용품 챙김성에 영향을 줍니다.<br>
+            위생에 대해 얼마나 민감한 편이신가요? (선택 항목)
+        </p>
+
+        <form method="POST" action="{% url 'accounts:preference_step' step_num=1 %}" id="preference-form-step">
+            {% csrf_token %}
+            
+            <div class="slider-container" id="slider-container-card">
+                <div class="slider-header">
+                    <span>편함 추구 (털털함)</span>
+                    <span>청결 중시 (민감함)</span>
+                </div>
+                
+                <div class="range-slider-wrapper">
+                    <input type="range" id="hygiene_sensitivity" name="hygiene_sensitivity" 
+                           class="range-slider" min="1" max="10" 
+                           value="{{ user_pref.hygiene_sensitivity|default:5 }}">
+                </div>
+
+                <div>
+                    <span class="slider-val-badge" id="slider-val-num">5</span>
+                    <span style="color: var(--text-muted); font-size: 1.2rem; font-weight: 700;">/ 10</span>
+                </div>
+                
+                <div class="slider-desc" id="slider-desc-text">
+                    기본 수준의 청결도만 있으면 문제 없이 편하게 지내는 편입니다.
+                </div>
+            </div>
+
+            <!-- Wizard Actions Grid -->
+            <div class="actions-grid" id="wizard-actions-container">
+                <button type="submit" name="skip" value="true" class="btn-skip" id="btn-wizard-skip">
+                    다음에 입력하기
+                </button>
+                <button type="submit" class="btn-next" id="btn-wizard-next">
+                    저장하고 다음으로 <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const slider = document.getElementById("hygiene_sensitivity");
+        const valBadge = document.getElementById("slider-val-num");
+        const descText = document.getElementById("slider-desc-text");
+        const card = document.getElementById("pref-card-main");
+        const form = document.getElementById("preference-form-step");
+        
+        // Trigger entrance slide from right
+        if (card) {
+            card.offsetHeight; // force reflow
+            card.classList.add("slide-active");
+        }
+
+        // Detailed feedback strings based on slider value
+        const descriptions = {
+            1: "위생에 전혀 신경 쓰지 않고 야생 같은 자연 속에서도 완전히 털털하게 잘 지냅니다.",
+            2: "청결도가 낮아도 예민하지 않으며 기본적으로 세면 도구만 대충 있으면 문제없습니다.",
+            3: "조금 낡은 숙소나 로컬 환경에서도 큰 불평 없이 털털하게 적응하는 편입니다.",
+            4: "평범하고 무난한 청결 수준을 원하며 위생 필터 등이 없어도 크게 개의치 않습니다.",
+            5: "기본 수준의 청결도만 유지되면 큰 트러블 없이 편하게 적응하며 지냅니다.",
+            6: "주변 정리가 어느 정도 되어 있어야 안심하며 로컬 물이 맞지 않을 것을 슬슬 우려합니다.",
+            7: "침구나 욕실 청결도에 약간 민감하며 샤워기 필터 지참을 긍정적으로 고민해봅니다.",
+            8: "위생 필터를 필수 지참하고 개인 청결 물티슈, 선크림, 클렌저 등을 철저히 챙깁니다.",
+            9: "숙소 침구와 수건 상태를 꼼꼼히 확인하며 세안용품과 다수의 여벌 세트를 세밀히 구비합니다.",
+            10: "초고감도 위생파! 샤워필터는 필수이며 매일 완벽한 위생 도구 세트를 갖춰야 안심합니다."
+        };
+
+        function updateSlider(val) {
+            valBadge.textContent = val;
+            descText.textContent = descriptions[val] || "";
+            
+            // Neon color shift based on value intensity
+            const intensity = (val - 1) / 9; // 0 to 1
+            const r = Math.round(0 + (124 - 0) * intensity);
+            const g = Math.round(229 + (77 - 229) * intensity);
+            const b = Math.round(255 + (255 - 255) * intensity);
+            const color = `rgb(${r}, ${g}, ${b})`;
+            valBadge.style.color = color;
+            valBadge.style.textShadow = `0 0 20px ${color}66`;
+        }
+
+        // Initialize values
+        updateSlider(slider.value);
+
+        // Input listener
+        slider.addEventListener("input", (e) => {
+            updateSlider(e.target.value);
+        });
+
+        // Intercept form submissions for transitions
+        if (form) {
+            // Track clicked button
+            let clickedButton = null;
+            
+            const skipBtn = document.getElementById("btn-wizard-skip");
+            const nextBtn = document.getElementById("btn-wizard-next");
+            
+            skipBtn.addEventListener("click", () => { clickedButton = "skip"; });
+            nextBtn.addEventListener("click", () => { clickedButton = "next"; });
+            
+            form.addEventListener("submit", (e) => {
+                e.preventDefault();
+                
+                // Trigger exit slide to left
+                if (card) {
+                    card.classList.remove("slide-active");
+                    card.classList.add("slide-exit");
+                }
+                
+                let msg = "";
+                if (clickedButton === "skip") {
+                    msg = "설정을 보류하고<br>다음 단계로 이동 중입니다...";
+                } else {
+                    msg = "위생 민감도를 기록하고<br>다음 단계로 이동 중입니다...";
+                }
+                
+                premiumTransition(msg, "", 1600);
+                
+                // Submit form programmatically after animation completes (1500ms)
+                setTimeout(() => {
+                    if (clickedButton === "skip") {
+                        const skipInput = document.createElement("input");
+                        skipInput.type = "hidden";
+                        skipInput.name = "skip";
+                        skipInput.value = "true";
+                        form.appendChild(skipInput);
+                    }
+                    form.submit();
+                }, 1500);
+            });
+        }
+    });
+</script>
+{% endblock %}
