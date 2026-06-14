@@ -1,7 +1,7 @@
 # 🌿 Today I Learned (TIL)
 
 > 배운 것을 잊어버리지 않기 위해, 그리고 어제보다 성장한 나를 기록하기 위한 공간입니다.
-> 무조건적인 양보다 **"왜 이렇게 동작하는지"**에 집중하여 기록합니다.
+> 무조건적인 양보다 **왜 이렇게 동작하는지**에 집중하여 기록합니다.
 
 ---
 
@@ -33,6 +33,7 @@
 
 - [Vue.js에서 컴포넌트 간 데이터 흐름 제어하기 (Props & Emit)](./Web/0608/vue_hw_7_4/readme.md)
 - [Vue.js에서 한글 반응성을 위한 v-on:input 활용법](./Web/0610/vue_hw_3_4/readme.md)
+- [axios 를 return 하느냐 마느냐의 차이](./Web/0615/vue_hw_9_4/readme.md)
 ---
 
 ## 🛠️ Tech Stack
