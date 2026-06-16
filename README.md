@@ -6,7 +6,7 @@
 ---
 
 ## 📅 TIL 작성 원칙
-1. **나의 언어로 재정리하기** - 단순히 공식 문서나 강의 코드를 받아적지 않습니다.
+1. **나의 언어로 재정리하기**
 2. **이유를 기록하기** - 에러를 만났다면 '어떻게 해결했는지'보다 '왜 발생했고 어떻게 예방할지'를 적습니다.
 3. **지속 가능하게 하기** - 너무 거창하게 쓰려다 지치지 않기 위해, 핵심 위주로 담백하게 기록합니다.
 
@@ -38,3 +38,4 @@
 
 ## 🛠️ Tech Stack
 <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=Python&logoColor=white"/> <img src="https://img.shields.io/badge/Django-092E20?style=flat-square&logo=Django&logoColor=white"/> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=JavaScript&logoColor=black"/> <img src="https://img.shields.io/badge/Vue.js-4FC08D?style=flat-square&logo=Vue.js&logoColor=white"/>
+ 
